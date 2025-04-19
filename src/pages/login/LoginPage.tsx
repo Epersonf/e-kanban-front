@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { useLoginStore } from '../stores/login.store';
+import { useLoginStore } from '../../stores/login.store';
+import styles from './LoginPage.module.css';
+import CommonInput from '../../components/common/common-input/CommonInput';
+import CommonButton from '../../components/common/common-button/CommonButton';
 
 const LoginPage: React.FC = observer(() => {
   const loginStore = useLoginStore();
@@ -38,19 +41,19 @@ const LoginPage: React.FC = observer(() => {
   };
 
   return (
-    <div>
-      <h1>{isSignup ? 'Sign Up' : 'Login'}</h1>
-      <form onSubmit={handleSubmit}>
+    <div className={styles["login-page"]}>
+      <h1 className={styles["login-title"]}>{isSignup ? 'Sign Up' : 'Login'}</h1>
+      <form onSubmit={handleSubmit} className={styles["login-form"]}>
         {isSignup && (
           <>
-            <input
+            <CommonInput
               type="text"
               placeholder="Name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
             />
-            <input
+            <CommonInput
               type="text"
               placeholder="Surname"
               value={surname}
@@ -59,26 +62,26 @@ const LoginPage: React.FC = observer(() => {
             />
           </>
         )}
-        <input
+        <CommonInput
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
         />
-        <input
+        <CommonInput
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <button type="submit">{isSignup ? 'Sign Up' : 'Login'}</button>
-        <button type="button" onClick={() => setIsSignup(!isSignup)}>
+        <CommonButton type="submit">{isSignup ? 'Sign Up' : 'Login'}</CommonButton>
+        <CommonButton type="button" variant="secondary" onClick={() => setIsSignup(!isSignup)}>
           {isSignup ? 'Already have an account? Login' : 'Create an account'}
-        </button>
-        {loginStore.loading && <p>Loading...</p>}
-        {loginStore.error && <p>Error: {loginStore.error}</p>}
+        </CommonButton>
+        {loginStore.loading && <p className={styles.loading}>Loading...</p>}
+        {loginStore.error && <p className={styles.error}>{loginStore.error}</p>}
       </form>
     </div>
   );

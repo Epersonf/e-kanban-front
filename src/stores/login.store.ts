@@ -1,10 +1,12 @@
 import { makeAutoObservable } from 'mobx';
 import UsersApi from '../infra/api/users.api';
+import { SignupRequestModel } from '../models/login/signup-request.model';
+import { LoginRequestModel } from '../models/login/login-request.model';
 
 export class LoginStore {
-  loading = false;
-  error = '';
-  token = '';
+  loading: boolean = false;
+  error: string = '';
+  token: string = '';
   usersApi: UsersApi;
 
   constructor() {
@@ -12,7 +14,7 @@ export class LoginStore {
     this.usersApi = new UsersApi();
   }
 
-  async signup(payload: any) {
+  async signup(payload: SignupRequestModel) {
     this.loading = true;
     this.error = '';
     try {
@@ -26,7 +28,7 @@ export class LoginStore {
     }
   }
 
-  async login(payload: any) {
+  async login(payload: LoginRequestModel) {
     this.loading = true;
     this.error = '';
     try {

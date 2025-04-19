@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import LoginPage from './pages/LoginPage';
+import LoginPage from './pages/login/LoginPage';
 import { BoardsPage } from './pages/BoardsPage';
 import { SingleBoardPage } from './pages/SingleBoardPage';
 
