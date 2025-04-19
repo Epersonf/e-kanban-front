@@ -1,0 +1,40 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Debug Chrome",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}",
+      "preLaunchTask": "Serve",
+      "env": {
+        "BROWSER": "none"
+      }
+    },
+    {
+      "type": "msedge",
+      "request": "launch",
+      "name": "Debug Edge",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}",
+      "preLaunchTask": "Serve",
+      "env": {
+        "BROWSER": "none"
+      }
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Debug Linux Chrome",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}",
+      "preLaunchTask": "Serve",
+      "runtimeExecutable": "/usr/bin/google-chrome-stable",
+      "env": {
+        "BROWSER": "none"
+      }
+    }
+  ]
+}
