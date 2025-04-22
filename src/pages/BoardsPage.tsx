@@ -1,6 +1,8 @@
 import { JSX } from "react";
 
 export function BoardsPage(): JSX.Element {
-  return <></>;
+  return <>
+  <h1>Hello sou o board</h1>
+  </>;
 }
 

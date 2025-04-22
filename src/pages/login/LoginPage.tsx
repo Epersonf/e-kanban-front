@@ -4,6 +4,7 @@ import { useLoginStore } from '../../stores/login.store';
 import styles from './LoginPage.module.css';
 import CommonInput from '../../components/common/common-input/CommonInput';
 import CommonButton from '../../components/common/common-button/CommonButton';
+import { useNavigate } from 'react-router-dom';
 
 const LoginPage: React.FC = observer(() => {
   const loginStore = useLoginStore();
@@ -12,11 +13,13 @@ const LoginPage: React.FC = observer(() => {
   const [name, setName] = useState('');
   const [surname, setSurname] = useState('');
   const [isSignup, setIsSignup] = useState(false);
+  const navigate = useNavigate();
 
   const handleLogin = async () => {
     await loginStore.login({ email, password });
     if (loginStore.token) {
       alert('Login successful!');
+      navigate('/boards');
     } else if (loginStore.error) {
       alert(`Login failed: ${loginStore.error}`);
     }
