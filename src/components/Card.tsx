@@ -1,19 +1,26 @@
 import React from 'react';
-import DeleteCardButton from './common/DeleteCardButton';
+
+export interface MemberType {
+  id: number;
+  name: string;
+  avatarUrl?: string;
+}
 
 export interface CardType {
   id: number;
   title: string;
   description: string;
+  members?: MemberType[];
 }
 
 interface CardProps {
   card: CardType;
   onDelete: () => void;
+  onClick?: () => void;
   draggableProps?: React.HTMLAttributes<HTMLDivElement>;
 }
 
-const Card: React.FC<CardProps> = ({ card, onDelete, draggableProps }) => (
+const Card: React.FC<CardProps> = ({ card, onDelete, onClick, draggableProps }) => (
   <div
     {...draggableProps}
     style={{
@@ -22,7 +29,7 @@ const Card: React.FC<CardProps> = ({ card, onDelete, draggableProps }) => (
       boxShadow: '0 1px 2px #0001',
       padding: 12,
       marginBottom: 8,
-      cursor: 'grab',
+      cursor: 'pointer',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
@@ -33,12 +40,35 @@ const Card: React.FC<CardProps> = ({ card, onDelete, draggableProps }) => (
       lineHeight: 1.5,
     }}
     draggable
+    onClick={onClick}
   >
-    <div>
+    <div style={{ flex: 1 }}>
       <div style={{ fontWeight: 600, fontSize: 16 }}>{card.title}</div>
       <div style={{ fontSize: 13, color: '#555', fontWeight: 400 }}>{card.description}</div>
+      {card.members && card.members.length > 0 && (
+        <div style={{ display: 'flex', gap: 4, marginTop: 6 }}>
+          {card.members.map(member => (
+            <img
+              key={member.id}
+              src={member.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}`}
+              alt={member.name}
+              title={member.name}
+              style={{ width: 24, height: 24, borderRadius: '50%', border: '1px solid #eee', objectFit: 'cover' }}
+            />
+          ))}
+        </div>
+      )}
     </div>
-    <DeleteCardButton onClick={onDelete} />
+    <button
+      onClick={e => {
+        e.stopPropagation();
+        onDelete();
+      }}
+      style={{ color: '#d32f2f', background: '#fff', border: '1px solid #d32f2f', marginLeft: 8, borderRadius: 4, cursor: 'pointer', fontWeight: 'bold', fontSize: 16 }}
+      title="Excluir cartão"
+    >
+      🗑
+    </button>
   </div>
 );
 

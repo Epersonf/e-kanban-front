@@ -275,6 +275,19 @@ const BoardsPage: React.FC = () => {
                     onCardDelete={cardId => handleCardDelete(list.id, cardId)}
                     onCardDragStart={handleCardDragStart}
                     isDragOver={dragOverListId === list.id}
+                    onCardUpdate={(cardId, updated) => {
+                      setBoards(prevBoards => prevBoards.map(board =>
+                        board.id !== selectedBoardId ? board : {
+                          ...board,
+                          lists: board.lists.map(l =>
+                            l.id !== list.id ? l : {
+                              ...l,
+                              cards: l.cards.map(card => card.id === cardId ? updated : card)
+                            }
+                          )
+                        }
+                      ));
+                    }}
                   />
                   <button
                     style={{ marginTop: 8, background: '#1f4068', color: '#fff', border: 'none', borderRadius: 4, padding: '6px 12px', cursor: 'pointer', fontWeight: 'bold', width: '100%' }}
