@@ -1,14 +1,9 @@
-import { Type } from 'class-transformer';
 import { User } from '../general/user.model';
 import { JsonObject, JsonProperty } from 'typescript-json-serializer';
 
-@JsonObject()
 export class LoginResponseModel {
-  @JsonProperty()
   private token: string;
-  @JsonProperty({ type: User })
   private user: User;
-  @JsonProperty()
   private expiresAt: number;
 
   constructor(params: {

@@ -7,7 +7,7 @@ import { ValueResult } from '../../models/value_result/value_result';
 import { JsonSerializer } from 'typescript-json-serializer';
 
 class UsersApi extends ApiCaller {
-  static serialize = new JsonSerializer();
+  private serialize = new JsonSerializer();
   public async signup(payload: SignupRequestModel): Promise<ValueResult<LoginResponseModel | null>> {
     const response = await this.post<LoginResponseModel>('/users/auth/signup', payload);
     if (response.isError()) return response;
@@ -19,10 +19,7 @@ class UsersApi extends ApiCaller {
     const response = await this.post<LoginResponseModel>('/users/auth/login', payload);
 
     if (response.isError()) return response;
-    const res = response.getValue() as LoginResponseModel;
-    console.log('Resposta da API:', res);
-    const value = UsersApi.serialize.deserializeObject(res, LoginResponseModel);
-    // const value = plainToClass(LoginResponseModel, res, { enableImplicitConversion: true, excludeExtraneousValues: true });
+    const value = plainToInstance(LoginResponseModel, response.getValue());
     return new ValueResult({ value });
   }
 }

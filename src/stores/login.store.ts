@@ -49,7 +49,7 @@ class LoginStore {
     return response;
   }
 
-  async login(): Promise<ValueResult<string> | null> {
+  async login(): Promise<ValueResult<boolean> | null> {
     const isValid = this.validate();
     if (!isValid) return null;
     this.loading = true;
@@ -63,7 +63,7 @@ class LoginStore {
     LoggedUserStorage.setUser(loggedData);
     this.error = response.getError() ?? 'Failed to login';
     this.loading = false;
-    return new ValueResult();
+    return new ValueResult({ value: true});
   }
 
   async logout(): Promise<ValueResult<string> | null> {

@@ -8,7 +8,7 @@ class LoggedUserStorage {
   private static readonly EXPIRES_AT_KEY = 'expiresAt';
 
   public static setUser(loginData: LoginResponseModel): void {
-    const user = plainToInstance(LoginResponseModel, loginData);
+    const user = plainToInstance(LoginResponseModel, loginData.getUser());
     if (!loginData) return;
 
     window.localStorage.setItem(this.USER_KEY, JSON.stringify(user));

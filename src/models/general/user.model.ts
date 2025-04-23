@@ -1,13 +1,8 @@
-import { JsonObject, JsonProperty } from "typescript-json-serializer";
 import { EntityMutable } from "../core/entity-mutable.mode";
 
-@JsonObject()
 export class User extends EntityMutable {
-  @JsonProperty()
   private name: string;
-  @JsonProperty()
   private surname: string;
-  @JsonProperty()
   private email: string;
 
   constructor(params: {

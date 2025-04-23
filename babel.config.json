@@ -1,0 +1,15 @@
+// .babelrc ou babel.config.js
+{
+  "presets": [
+    "@babel/preset-env",
+    // Adicione a opção runtime: 'automatic' aqui se quiser centralizar tudo
+    ["@babel/preset-react", { "runtime": "automatic" }],
+    "@babel/preset-typescript"
+  ],
+  "plugins": [
+    "babel-plugin-transform-typescript-metadata",
+    // Certifique-se que decorators venha ANTES de class-properties
+    ["@babel/plugin-proposal-decorators", { "legacy": true }],
+    ["@babel/plugin-proposal-class-properties", { "loose": true }]
+  ]
+}

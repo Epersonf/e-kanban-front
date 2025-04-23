@@ -1,11 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "target": "ESNext",
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -20,10 +15,19 @@
     "isolatedModules": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "sourceMap": true,
     "noEmit": true,
     "jsx": "react-jsx"
   },
   "include": [
-    "src"
-  ]
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.js",
+    "src/**/*.jsx"
+  ],
+  "lib": [
+    "esnext",
+    "dom",
+    "dom.iterable"
+  ],
 }
