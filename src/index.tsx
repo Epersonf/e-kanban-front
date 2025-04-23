@@ -1,22 +1,12 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import BoardsPage from './pages/boards';
-import reportWebVitals from './reportWebVitals';
+import "reflect-metadata";
 
-const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
-);
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
+
+const root = ReactDOM.createRoot(document.getElementById("root")!);
 root.render(
   <React.StrictMode>
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Navigate to="/boards" />} />
-        <Route path="/boards" element={<BoardsPage />} />
-      </Routes>
-    </BrowserRouter>
+    <App />
   </React.StrictMode>
 );
-
-reportWebVitals();

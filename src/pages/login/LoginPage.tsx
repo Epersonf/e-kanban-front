@@ -16,19 +16,19 @@ const LoginPage: React.FC = observer(() => {
   const navigate = useNavigate();
 
   const handleLogin = async () => {
-    await loginStore.login({ email, password });
-    if (loginStore.token) {
-      alert('Login successful!');
-      navigate('/boards');
-    } else if (loginStore.error) {
-      alert(`Login failed: ${loginStore.error}`);
+    const res = await loginStore.login();
+    if (res?.isError() || !res) {
+      alert(`Login failed: ${res?.getError()}`);
+      return;
     }
+    navigate('/boards');
   };
 
   const handleSignup = async () => {
     await loginStore.signup({ name, surname, email, password });
     if (loginStore.token) {
       alert('Signup successful!');
+      navigate('/boards');
     } else if (loginStore.error) {
       alert(`Signup failed: ${loginStore.error}`);
     }
@@ -68,15 +68,15 @@ const LoginPage: React.FC = observer(() => {
         <CommonInput
           type="email"
           placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          value={loginStore.email}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => loginStore.setEmail(e.target.value)}
           required
         />
         <CommonInput
           type="password"
           placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          value={loginStore.password}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => loginStore.setPassword(e.target.value)}
           required
         />
         <CommonButton type="submit">{isSignup ? 'Sign Up' : 'Login'}</CommonButton>

@@ -1,4 +1,6 @@
 import React from 'react';
+import LoggedUserStorage from '../../models/storage/logged_user_storage';
+import { useNavigate } from 'react-router-dom';
 
 interface ProfileMenuProps {
   userName: string;
@@ -7,6 +9,13 @@ interface ProfileMenuProps {
 
 const ProfileMenu: React.FC<ProfileMenuProps> = ({ userName, onLogout }) => {
   const [open, setOpen] = React.useState(false);
+  const navigate = useNavigate();
+  const logout = () => {
+    onLogout();
+    setOpen(false);
+    LoggedUserStorage.clear();
+    navigate('/');
+  }
 
   return (
     <div style={{ position: 'relative', marginLeft: 'auto' }}>
@@ -25,7 +34,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({ userName, onLogout }) => {
             Olá, <b>{userName}</b>
           </div>
           <button
-            onClick={onLogout}
+            onClick={logout}
             style={{ background: 'transparent', border: 'none', color: '#d32f2f', padding: 16, width: '100%', textAlign: 'left', cursor: 'pointer', borderRadius: '0 0 8px 8px', fontWeight: 'bold' }}
           >
             Sair

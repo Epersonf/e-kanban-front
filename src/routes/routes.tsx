@@ -7,13 +7,13 @@ import { SingleBoardPage } from "../pages/SingleBoardPage";
 function MainRoutes(): JSX.Element {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/login" replace />}/>
+      <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<LoginPage />} />
 
+      //TODO fazer rotas protegidas abaixo
       <Route path="/boards" element={<BoardsPage />} />
       <Route path="/board/:id" element={<SingleBoardPage />} />
 
-      //TODO fazer rotas protegidas abaixo
 
     </Routes>
   )

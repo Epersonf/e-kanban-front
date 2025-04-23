@@ -1,13 +1,16 @@
+import { JsonObject, JsonProperty } from "typescript-json-serializer";
 import { EntityImmutable } from "./entity-immutable.model";
 
 /**
  * Represents a base mutable entity, inheriting immutable properties
  * and adding modification timestamp tracking.
  */
+@JsonObject()
 export abstract class EntityMutable extends EntityImmutable {
   /**
    * The UTC timestamp when the entity was last updated.
    */
+  @JsonProperty()
   public updatedAtUtc?: Date;
 
   /**
@@ -22,6 +25,7 @@ export abstract class EntityMutable extends EntityImmutable {
     updatedAtUtc?: Date,
   }) {
     super(params);
+    if (!params) return;
     this.updatedAtUtc = params.updatedAtUtc;
   }
 }
