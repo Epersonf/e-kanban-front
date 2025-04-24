@@ -18,6 +18,7 @@ export class Board extends EntityMutable {
     swimlanes?: Swimlane[]
   }) {
     super(params);
+    if (!params) return;
     this.name = params.name;
     this.description = params.description;
     this.members = params.members || [];

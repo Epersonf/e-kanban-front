@@ -2,6 +2,7 @@ import axios, { AxiosError, AxiosInstance } from 'axios';
 import { Constants } from '../constants/constants';
 import { ValueResult } from '../../models/value_result/value_result';
 import { error } from 'console';
+import LoggedUserStorage from '../../models/storage/logged_user_storage';
 
 class ApiCaller {
   private axiosInstance: AxiosInstance;
@@ -14,7 +15,7 @@ class ApiCaller {
       },
     });
     this.axiosInstance.interceptors.request.use(config => {
-      const token = localStorage.getItem('token');
+      const token = LoggedUserStorage
       if (token) {
         config.headers = config.headers || {};
         config.headers['Authorization'] = `Bearer ${token}`;

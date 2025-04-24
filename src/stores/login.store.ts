@@ -42,7 +42,7 @@ class LoginStore {
   async signup(payload: SignupRequestModel) {
     this.loading = true;
     this.error = '';
-    const response = await this.usersApi.signup(payload);
+    const response = await UsersApi.signup(payload);
     if (response.isError()) return response;
     this.loading = false;
     this.error = response.getError() ?? 'Failed to signup';
@@ -54,7 +54,7 @@ class LoginStore {
     if (!isValid) return null;
     this.loading = true;
     this.error = '';
-    const response = await this.usersApi.login({
+    const response = await UsersApi.login({
       email: this.email,
       password: this.password
     });

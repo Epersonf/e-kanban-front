@@ -5,22 +5,31 @@ import { LoginResponseModel } from '../../models/login/login-response.model';
 import { plainToClass, plainToInstance } from 'class-transformer';
 import { ValueResult } from '../../models/value_result/value_result';
 import { JsonSerializer } from 'typescript-json-serializer';
+import KanbanAPiRequest from '../../api';
 
-class UsersApi extends ApiCaller {
-  private serialize = new JsonSerializer();
-  public async signup(payload: SignupRequestModel): Promise<ValueResult<LoginResponseModel | null>> {
-    const response = await this.post<LoginResponseModel>('/users/auth/signup', payload);
-    if (response.isError()) return response;
-    const value = plainToClass(LoginResponseModel, response.getValue());
-    return new ValueResult({ value });
+class UsersApi {
+  private static axios = KanbanAPiRequest.getAxios()
+  static async signup(payload: SignupRequestModel): Promise<ValueResult<LoginResponseModel | null>> {
+    try {
+      const response = await this.axios.post<LoginResponseModel>('/users/auth/signup', payload);
+      const value = plainToClass(LoginResponseModel, response.data);
+      return new ValueResult({ value });
+    } catch (error) {
+      console.error('Error signing up:', error);
+      return new ValueResult({ error: 'Error signing up' });
+    }
   }
 
-  public async login(payload: LoginRequestModel): Promise<ValueResult<LoginResponseModel | null>> {
-    const response = await this.post<LoginResponseModel>('/users/auth/login', payload);
+  static async login(payload: LoginRequestModel): Promise<ValueResult<LoginResponseModel | null>> {
+    try {
+      const response = await this.axios.post<LoginResponseModel>('/users/auth/login', payload);
 
-    if (response.isError()) return response;
-    const value = plainToInstance(LoginResponseModel, response.getValue());
-    return new ValueResult({ value });
+      const value = plainToInstance(LoginResponseModel, response.data);
+      return new ValueResult({ value });
+    } catch (error) {
+      console.error('Error logging in:', error);
+      return new ValueResult({ error: 'Error logging in' });
+    }
   }
 }
 export default UsersApi;
