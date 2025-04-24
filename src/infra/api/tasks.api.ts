@@ -26,20 +26,20 @@ class TasksApi extends ApiCaller {
   public async createTask(payload: CreateTaskPayload): Promise<ValueResult<Task | null>> {
     // Assuming the endpoint is '/tasks'
     // The response likely returns the created task object
-    return this.post<Task>('/tasks', payload);
+    return this.post<Task>('/tasks/user', payload);
   }
 
   public async updateTask(payload: UpdateTaskPayload): Promise<ValueResult<Task | null>> {
     // Assuming the endpoint is `/tasks/{id}`
     // Send only the fields being updated
     const { id, ...updateData } = payload;
-    return this.put<Task>(`/tasks/${id}`, updateData);
+    return this.put<Task>(`/tasks/user/${id}`, updateData);
   }
 
   public async deleteTask(id: string): Promise<ValueResult<null>> { // Task ID is string
     // Assuming the endpoint is `/tasks/{id}`
     // Assuming no content on successful delete
-    return this.delete<null>(`/tasks/${id}`);
+    return this.delete<null>(`/tasks/user/${id}`);
   }
 }
 

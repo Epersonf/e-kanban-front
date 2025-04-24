@@ -15,7 +15,7 @@ class ApiCaller {
       },
     });
     this.axiosInstance.interceptors.request.use(config => {
-      const token = LoggedUserStorage
+      const token = LoggedUserStorage.getToken();
       if (token) {
         config.headers = config.headers || {};
         config.headers['Authorization'] = `Bearer ${token}`;

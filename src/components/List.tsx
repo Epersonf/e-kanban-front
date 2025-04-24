@@ -14,10 +14,22 @@ interface ListProps {
   onCardDragStart: (card: CardType, fromListId: number) => void;
   isDragOver: boolean;
   onCardUpdate?: (cardId: number, updated: CardType) => void;
+  onListTitleChange?: (newTitle: string) => void;
+  onListDelete?: () => void;
 }
 
-const List: React.FC<ListProps> = ({ list, onCardDelete, onCardDragStart, isDragOver, onCardUpdate }) => {
+const List: React.FC<ListProps> = ({
+  list,
+  onCardDelete,
+  onCardDragStart,
+  isDragOver,
+  onCardUpdate,
+  onListTitleChange,
+  onListDelete
+}) => {
   const [selectedCard, setSelectedCard] = useState<CardType | null>(null);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editingTitle, setEditingTitle] = useState(list.title);
 
   const handleCardClick = (card: CardType) => {
     setSelectedCard(card);
@@ -35,6 +47,14 @@ const List: React.FC<ListProps> = ({ list, onCardDelete, onCardDragStart, isDrag
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
   };
+
+  const handleSaveTitle = () => {
+    if (onListTitleChange && editingTitle.trim() !== list.title) {
+      onListTitleChange(editingTitle.trim())
+    }
+    setIsEditingTitle(false)
+  }
+
 
   return (
     <div

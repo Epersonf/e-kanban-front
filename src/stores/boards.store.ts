@@ -127,22 +127,22 @@ export class BoardsStore {
     this.selectedBoardId = id;
   }
 
-  async createSwimlane(boardId: string, name: string): Promise<void> {
+  async createSwimlane(boardId: string, name: string, order: number): Promise<void> {
     this.error = null;
     try {
-      const result = await swimlanesApi.createSwimlane({ boardId, name });
-     
-        if (result.isSuccess()) {
-          const newSwimlane = result.getValue();
-          if (newSwimlane) { // Check if newSwimlane is not null
-            const boardIndex = this.boards.findIndex(b => b.id === boardId);
-            if (boardIndex !== -1) {
-              const board = this.boards[boardIndex];
-              if (board.id && board.createdAtUtc) {
-                const updatedSwimlanes = [...board.getSwimlanes(), newSwimlane]; // newSwimlane is guaranteed to be Swimlane here
-                this.boards[boardIndex] = new Board({
-                  id: board.id,
-                  createdAtUtc: board.createdAtUtc,
+      const result = await swimlanesApi.createSwimlane({ swimlanes: [{ boardId, name, order }] });
+
+      if (result.isSuccess()) {
+        const newSwimlane = result.getValue();
+        if (newSwimlane) { // Check if newSwimlane is not null
+          const boardIndex = this.boards.findIndex(b => b.id === boardId);
+          if (boardIndex !== -1) {
+            const board = this.boards[boardIndex];
+            if (board.id && board.createdAtUtc) {
+              const updatedSwimlanes = [...board.getSwimlanes(), newSwimlane]; // newSwimlane is guaranteed to be Swimlane here
+              this.boards[boardIndex] = new Board({
+                id: board.id,
+                createdAtUtc: board.createdAtUtc,
                 updatedAtUtc: new Date(),
                 name: board.getName(),
                 description: board.getDescription(),
@@ -158,8 +158,8 @@ export class BoardsStore {
           this.error = result.getError() || 'Erro ao criar lista';
         }
       }
-      
-      
+
+
     } catch (error: any) {
       runInAction(() => {
         this.error = 'Erro ao criar lista';
@@ -167,24 +167,24 @@ export class BoardsStore {
     }
   }
 
-  async updateSwimlaneName(id: string, name: string): Promise<void> {
+  async updateSwimlaneName(id: string, name: string, boardId: string, order: number): Promise<void> {
     this.error = null;
     try {
-      const result = await swimlanesApi.updateSwimlane({ id, name });
+      const result = await swimlanesApi.updateSwimlane({ swimlanes: [{ boardId, name, order, id }] });
 
-        if (result.isSuccess()) {
-          const updatedSwimlane = result.getValue();
-          if (updatedSwimlane) { // Check if updatedSwimlane is not null
-            this.boards = this.boards.map(board => {
-              const swimlaneIndex = board.getSwimlanes().findIndex(s => s.id === id);
-              if (swimlaneIndex !== -1) {
-                // Check for updatedSwimlane properties inside the null check
-                if (board.id && board.createdAtUtc && updatedSwimlane.id && updatedSwimlane.createdAtUtc) {
-                  const updatedSwimlanes = [...board.getSwimlanes()];
-                  updatedSwimlanes[swimlaneIndex] = updatedSwimlane; // updatedSwimlane is guaranteed to be Swimlane here
-                  return new Board({
-                    id: board.id,
-                    createdAtUtc: board.createdAtUtc,
+      if (result.isSuccess()) {
+        const updatedSwimlane = result.getValue();
+        if (updatedSwimlane) { // Check if updatedSwimlane is not null
+          this.boards = this.boards.map(board => {
+            const swimlaneIndex = board.getSwimlanes().findIndex(s => s.id === id);
+            if (swimlaneIndex !== -1) {
+              // Check for updatedSwimlane properties inside the null check
+              if (board.id && board.createdAtUtc && updatedSwimlane.id && updatedSwimlane.createdAtUtc) {
+                const updatedSwimlanes = [...board.getSwimlanes()];
+                updatedSwimlanes[swimlaneIndex] = updatedSwimlane; // updatedSwimlane is guaranteed to be Swimlane here
+                return new Board({
+                  id: board.id,
+                  createdAtUtc: board.createdAtUtc,
                   updatedAtUtc: new Date(),
                   name: board.getName(),
                   description: board.getDescription(),
@@ -201,7 +201,7 @@ export class BoardsStore {
         } else {
           this.error = result.getError() || 'Erro ao atualizar lista';
         }
-        }
+      }
     } catch (error: any) {
       runInAction(() => {
         this.error = 'Erro ao atualizar lista';
@@ -246,20 +246,20 @@ export class BoardsStore {
     this.error = null;
     try {
       const result = await tasksApi.createTask({ swimlaneId, name, description });
-        if (result.isSuccess()) {
-          const newTask = result.getValue();
-          if (newTask) { // Check if newTask is not null
-            this.boards = this.boards.map(board => {
-              let boardNeedsUpdate = false;
-              const updatedSwimlanes = board.getSwimlanes().map(swimlane => {
-                if (swimlane.id === swimlaneId) {
-                  // Check for newTask properties inside the null check
-                  if (swimlane.id && swimlane.createdAtUtc && newTask.id && newTask.createdAtUtc) {
-                    boardNeedsUpdate = true;
-                    const updatedTasks = [...swimlane.getTasks(), newTask]; // newTask is guaranteed to be Task here
-                    return new Swimlane({
-                      id: swimlane.id,
-                      createdAtUtc: swimlane.createdAtUtc,
+      if (result.isSuccess()) {
+        const newTask = result.getValue();
+        if (newTask) { // Check if newTask is not null
+          this.boards = this.boards.map(board => {
+            let boardNeedsUpdate = false;
+            const updatedSwimlanes = board.getSwimlanes().map(swimlane => {
+              if (swimlane.id === swimlaneId) {
+                // Check for newTask properties inside the null check
+                if (swimlane.id && swimlane.createdAtUtc && newTask.id && newTask.createdAtUtc) {
+                  boardNeedsUpdate = true;
+                  const updatedTasks = [...swimlane.getTasks(), newTask]; // newTask is guaranteed to be Task here
+                  return new Swimlane({
+                    id: swimlane.id,
+                    createdAtUtc: swimlane.createdAtUtc,
                     updatedAtUtc: new Date(),
                     boardId: swimlane.getBoardId(),
                     name: swimlane.getName(),

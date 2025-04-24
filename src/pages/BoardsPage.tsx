@@ -71,13 +71,13 @@ export const BoardsPage: React.FC = observer(() => { // Wrap component with obse
     if (!selectedBoardId) return;
     const name = prompt('Nome da nova lista:') || '';
     if (!name.trim()) return;
-    boardsStore.createSwimlane(selectedBoardId, name.trim());
+    boardsStore.createSwimlane(selectedBoardId, name.trim(), boards.length);
   };
 
   // Note: UpdateList handler was missing in original, assuming it's needed for List component title editing
-  const handleUpdateList = (listId: string, name: string) => { // ID is string
+  const handleUpdateList = (listId: string, name: string, order: number) => { // ID is string
      if (!name.trim()) return; // Prevent empty names
-     boardsStore.updateSwimlaneName(listId, name.trim());
+     boardsStore.updateSwimlaneName(listId, name.trim(), selectedBoardId!, order);
   };
 
 
