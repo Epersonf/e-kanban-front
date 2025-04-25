@@ -3,10 +3,10 @@ import { Swimlane } from "./swimlane.model";
 import { User } from "./user.model";
 
 export class Board extends EntityMutable {
-  private name: string;
-  private description?: string;
-  private members: User[];
-  private swimlanes: Swimlane[];
+  name: string;
+  description?: string;
+  members: User[];
+  swimlanes: Swimlane[];
 
   constructor(params: {
     id: string,

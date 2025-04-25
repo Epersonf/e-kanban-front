@@ -1,9 +1,9 @@
 import { EntityMutable } from "../core/entity-mutable.mode";
 
 export class Task extends EntityMutable {
-  private swimlaneId: string;
-  private name: string;
-  private description?: string;
+  swimlaneId: string;
+  name: string;
+  description?: string;
   
   constructor(params: {
     id: string,

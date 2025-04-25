@@ -24,9 +24,12 @@ class TasksApi extends ApiCaller {
   // Add a getTasks method if needed.
 
   public async createTask(payload: CreateTaskPayload): Promise<ValueResult<Task | null>> {
+    const requestBody = {
+      tasks: [payload], // Coloca o payload como um item no array de boards
+    };
     // Assuming the endpoint is '/tasks'
     // The response likely returns the created task object
-    return this.post<Task>('/tasks/user', payload);
+    return this.post<Task>('/tasks/user', requestBody);
   }
 
   public async updateTask(payload: UpdateTaskPayload): Promise<ValueResult<Task | null>> {

@@ -1,9 +1,9 @@
 import { EntityMutable } from "../core/entity-mutable.mode";
 
 export class User extends EntityMutable {
-  private name: string;
-  private surname: string;
-  private email: string;
+  name: string;
+  surname: string;
+  email: string;
 
   constructor(params: {
     id?: string,

@@ -6,7 +6,6 @@ import { plainToInstance } from 'class-transformer';
 import { PaginatedList } from '../../models/pagination/paginated_list';
 import { CreateBoardResponse } from '../../models/boards/boards-response.model';
 
-// Define request/response types based on usage in BoardsPage.tsx and Board model
 interface CreateBoardPayload {
   boards: { name: string; description?: string }[]; // Use name, description optional
 }
@@ -15,6 +14,7 @@ interface CreateBoardPayload {
 interface UpdateBoardPayload {
   id: string; // Board ID is string in the model
   name: string; // Use name instead of title
+  description?: string;
   // Add other updatable fields if necessary, e.g., description
 }
 
@@ -60,7 +60,10 @@ export class BoardsApi {
 
   static async updateBoard(payload: UpdateBoardPayload): Promise<ValueResult<Board | null>> {
     try {
-      const res = await this.axios.put<Board>(`/boards/${payload.id}`, { name: payload.name });
+      const requestBody = {
+        boards: [payload], // Coloca o payload como um item no array de boards
+      };
+      const res = await this.axios.patch<Board>(`/boards/user`, requestBody);
       const value = plainToInstance(Board, res.data);
       return new ValueResult({ value });
     } catch (error) {
@@ -69,9 +72,11 @@ export class BoardsApi {
     }
   }
 
-  static async deleteBoard(id: string): Promise<ValueResult<null>> { // Board ID is string
+  static async deleteBoard(ids: string[]): Promise<ValueResult<null>> { // Board ID is string
     try {
-      const res = await this.axios.put(`/boards/${id}`);
+      const res = await this.axios.delete(`/boards/user`, {
+        data: { ids },
+      });
       return new ValueResult({ value: res.data });
     } catch (error) {
       console.error('Error deleting board:', error);

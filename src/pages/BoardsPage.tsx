@@ -11,6 +11,7 @@ import { FiEdit } from "react-icons/fi";
 import boardsStore from "../stores/boards.store"; // Import the store instance
 import { Task } from "../models/general/task.model"; // Import Task model
 import { Swimlane } from "../models/general/swimlane.model"; // Import Swimlane model
+import styles from './BoardsPage.module.css'; // Import the CSS module
 
 // Remove local BoardType interface if Board model from store is used directly
 
@@ -56,28 +57,28 @@ export const BoardsPage: React.FC = observer(() => { // Wrap component with obse
       return;
     }
     if (editingTitle.trim() !== selectedBoard.getName()) {
-        boardsStore.updateBoardName(selectedBoardId, editingTitle.trim());
+      boardsStore.updateBoardName(selectedBoardId, editingTitle.trim(), selectedBoard.getDescription());
     }
     setIsEditingTitle(false);
   };
 
-  const handleDeleteBoard = (id: string) => { // ID is string
+  const handleDeleteBoard = (ids: string[]) => { // ID is string
     if (!window.confirm('Tem certeza que deseja excluir este board?')) return;
-    boardsStore.deleteBoard(id);
+    boardsStore.deleteBoard(ids);
   };
 
   // Swimlane (List) Handlers
-  const handleAddList = () => {
+  const handleAddList = async () => {
     if (!selectedBoardId) return;
     const name = prompt('Nome da nova lista:') || '';
     if (!name.trim()) return;
-    boardsStore.createSwimlane(selectedBoardId, name.trim(), boards.length);
+    await boardsStore.createSwimlane(selectedBoardId, name.trim(), boards.length);
   };
 
   // Note: UpdateList handler was missing in original, assuming it's needed for List component title editing
   const handleUpdateList = (listId: string, name: string, order: number) => { // ID is string
-     if (!name.trim()) return; // Prevent empty names
-     boardsStore.updateSwimlaneName(listId, name.trim(), selectedBoardId!, order);
+    if (!name.trim()) return; // Prevent empty names
+    boardsStore.updateSwimlaneName(listId, name.trim(), selectedBoardId!, order);
   };
 
 
@@ -156,33 +157,33 @@ export const BoardsPage: React.FC = observer(() => { // Wrap component with obse
   };
 
   const handleCardDeleteFromList = (cardId: number, listId: number) => { // List returns numbers
-     handleCardDelete(cardId.toString(), listId.toString()); // Convert back to strings for store
+    handleCardDelete(cardId.toString(), listId.toString()); // Convert back to strings for store
   };
 
 
   // --- Rendering ---
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#0a192f' }}>
+    <div className={styles["boards-page"]}>
       <BoardMenu
         // Pass adapted props
         boards={adaptBoardsForMenu()}
         selectedBoardId={adaptSelectedBoardIdForMenu()}
         onSelect={handleSelectBoardFromMenu} // Use adapted handler
         onCreate={handleCreateBoard}
-        // onDelete={(id: number) => handleDeleteBoard(id.toString())} // Adapt delete if needed
+      // onDelete={(id: number) => handleDeleteBoard(id.toString())} // Adapt delete if needed
       />
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#0a192f' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#162447', color: '#fff', padding: '16px 24px' }}>
+      <div className={styles["main-content"]}>
+        <div className={styles["header-container"]}>
           <Header />
           <ProfileMenu userName={userName} onLogout={handleLogout} />
         </div>
         {loading ? (
-          <div style={{ color: '#fff', padding: 48, fontSize: 22, textAlign: 'center' }}>Carregando boards...</div>
+          <div className={styles["status-message"]}>Carregando boards...</div>
         ) : error ? (
-          <div style={{ color: 'red', padding: 48, fontSize: 22, textAlign: 'center' }}>Erro: {error}</div>
+          <div className={`${styles["status-message"]} ${styles.error}`}>Erro: {error}</div> // Combine classes if needed, assuming an error class exists or add one
         ) : selectedBoard ? (
-          <div style={{ padding: 24, overflowY: 'auto' }}> {/* Allow vertical scroll for content */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24 }}>
+          <div className={styles["board-content"]}> {/* Allow vertical scroll for content */}
+            <div className={styles["board-title-area"]}>
               {isEditingTitle ? (
                 <input
                   type="text"
@@ -197,31 +198,31 @@ export const BoardsPage: React.FC = observer(() => { // Wrap component with obse
                     }
                   }}
                   autoFocus
-                  style={{ fontSize: '1.5em', fontWeight: 'bold', color: '#fff', background: '#1f4068', border: '1px solid #5dade2', borderRadius: 4, padding: '4px 8px', outline: 'none' }}
+                  className={styles["title-input"]}
                 />
               ) : (
                 // Use getName()
-                <h2 style={{ color: '#fff', margin: 0 }}>{selectedBoard.getName()}</h2>
+                <h2 className={styles["board-title"]}>{selectedBoard.getName()}</h2>
               )}
               {!isEditingTitle && selectedBoard.id && ( // Only show edit if not editing and board exists
                 <button
                   onClick={() => setIsEditingTitle(true)}
-                  style={{ background: 'transparent', border: 'none', color: '#a7c0cd', cursor: 'pointer', padding: 4 }}
+                  className={styles["edit-button"]}
                   title="Editar título do board"
                 >
                   <FiEdit size={18} />
                 </button>
               )}
               {selectedBoard.id && ( // Only show delete if board exists
-                 <button
-                    onClick={() => handleDeleteBoard(selectedBoard.id!)} // Use non-null assertion or check id
-                    style={{ background: '#d32f2f', color: '#fff', border: 'none', borderRadius: 4, padding: '6px 14px', fontWeight: 'bold', cursor: 'pointer', marginLeft: 12 }}
-                    title="Excluir board"
-                  >Excluir</button>
+                <button
+                  onClick={() => handleDeleteBoard([selectedBoard.id!])} // Use non-null assertion or check id
+                  className={styles["delete-button"]}
+                  title="Excluir board"
+                >Excluir</button>
               )}
             </div>
             {/* Horizontal scroll for lists */}
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, overflowX: 'auto', paddingBottom: '16px' }}>
+            <div className={styles["lists-container"]}>
               {selectedBoard.getSwimlanes() && selectedBoard.getSwimlanes().map(list => (
                 <div
                   key={list.id} // Use list.id
@@ -231,25 +232,27 @@ export const BoardsPage: React.FC = observer(() => { // Wrap component with obse
                   // }}
                   // onDragLeave={() => setDragOverListId(null)}
                   // onDrop={() => handleCardDrop(list.id!)} // Use non-null assertion or check id
-                  style={{ minWidth: 280, background: '#162447', padding: 16, borderRadius: 8, flexShrink: 0 }} // Prevent lists shrinking
+                  className={styles["list-wrapper"]} // Prevent lists shrinking
                 >
                   {/* Pass adapted list data */}
                   <List
                     list={adaptListForListComponent(list)}
                     // Adapt handlers to convert IDs back to string for store actions
                     onCardDelete={(cardId) => handleCardDeleteFromList(cardId, parseInt(list.id!, 10))} // Use adapted handler
-                    // onListDelete={() => handleDeleteList(list.id!)} // Removed prop
+                    onListDelete={() => handleDeleteList(list.id!)} // Removed prop
                     // onListTitleChange={(newTitle: string) => handleUpdateList(list.id!, newTitle)} // Removed prop
                     onCardDragStart={() => { console.warn("onCardDragStart not implemented"); }} // Placeholder
                     isDragOver={false} // Placeholder - requires state like dragOverListId
-                    onCardUpdate={(cardId, updatedData) => {
-                        // This needs a store action: boardsStore.updateTask(cardId, updatedData)
-                        // Need to convert cardId back to string for store
-                        console.warn("Card update not implemented in store yet", cardId.toString(), updatedData);
+                    onCardUpdate={(cardId, updatedData,) => {
+
+                      handleUpdateList(list.id!, updatedData.title || '', parseInt(list.id!, 10));
+                      // This needs a store action: boardsStore.updateTask(cardId, updatedData)
+                      // Need to convert cardId back to string for store
+                      console.warn("Card update not implemented in store yet", cardId.toString(), updatedData);
                     }}
                   />
                   <button
-                    style={{ marginTop: 8, background: '#1f4068', color: '#fff', border: 'none', borderRadius: 4, padding: '6px 12px', cursor: 'pointer', fontWeight: 'bold', width: '100%' }}
+                    className={styles["add-card-button"]}
                     onClick={() => handleOpenAddCard(list.id!)} // Use non-null assertion or check id
                   >
                     + Adicionar cartão
@@ -260,7 +263,7 @@ export const BoardsPage: React.FC = observer(() => { // Wrap component with obse
             </div>
           </div>
         ) : (
-          <div style={{ color: '#fff', padding: 48, fontSize: 22, textAlign: 'center' }}>
+          <div className={styles["status-message"]}>
             {boards.length > 0 ? "Selecione um board ao lado." : "Crie seu primeiro board!"}
           </div>
         )}

@@ -3,9 +3,12 @@ import { Board } from '../models/general/board.model';
 import { Swimlane } from '../models/general/swimlane.model';
 import { Task } from '../models/general/task.model';
 import { BoardsApi } from '../infra/api/boards.api';
-import swimlanesApi from '../infra/api/swimlanes.api';
-import tasksApi from '../infra/api/tasks.api';
-import { CreateBoardResponse } from '../models/boards/boards-response.model';
+import { parseApiDate } from '../utils/parse-api-date.utils';
+import { User } from '../models/general/user.model';
+import * as createBoardOps from './create.boards'; // Import board create operations
+import * as updateBoardOps from './update.boards'; // Import board update/delete operations
+import * as createSwimlaneOps from './create.swimlanes'; // Import swimlane create operations
+import * as updateSwimlaneOps from './update.swimlanes'; // Import swimlane update/delete operations
 
 export class BoardsStore {
   boards: Board[] = [];
@@ -31,12 +34,52 @@ export class BoardsStore {
       const result = await BoardsApi.getBoards({
         page: 1,
         pageSize: 10,
-        populateWithSwimlanes: false,
-        populateWithMembers: false,
+        populateWithSwimlanes: true,
+        populateWithMembers: true,
       });
       runInAction(() => {
         if (result.isSuccess()) {
-          this.boards = result.getValue()!.items as Board[];
+          const apiData = result.getValue();
+          if (apiData && Array.isArray(apiData.items)) {
+            this.boards = apiData.items.map(boardData => {
+              const swimlanes = (boardData?.swimlanes || []).map(swimlaneData => {
+                const tasks = (swimlaneData.tasks || []).map(taskData => new Task({
+                  id: taskData.id!,
+                  createdAtUtc: parseApiDate(taskData.createdAtUtc),
+                  updatedAtUtc: parseApiDate(taskData.updatedAtUtc) || taskData.updatedAtUtc,
+                  swimlaneId: taskData.id!,
+                  name: taskData.name!,
+                  description: taskData.description!,
+                }));
+                return new Swimlane({
+                  id: swimlaneData.id!,
+                  createdAtUtc: parseApiDate(swimlaneData.createdAtUtc),
+                  updatedAtUtc: parseApiDate(swimlaneData.updatedAtUtc) || swimlaneData.updatedAtUtc,
+                  boardId: swimlaneData.boardId!,
+                  name: swimlaneData.name!,
+                  order: swimlaneData.order ?? 0,
+                  tasks,
+                });
+              });
+              const members = (boardData?.getMembers() || []).map(memberData => new User({
+                id: memberData.id!,
+                createdAtUtc: parseApiDate(memberData.createdAtUtc),
+                updatedAtUtc: parseApiDate(memberData.updatedAtUtc) || memberData.updatedAtUtc,
+                name: memberData.name!,
+                surname: memberData.surname!,
+                email: memberData.email!,
+              }));
+              return new Board({
+                id: boardData?.id!,
+                createdAtUtc: parseApiDate(boardData?.createdAtUtc),
+                updatedAtUtc: parseApiDate(boardData?.updatedAtUtc) || boardData?.updatedAtUtc,
+                name: boardData?.getName() || '',
+                description: boardData?.getDescription(),
+                members,
+                swimlanes,
+              })
+            })
+          }
           this.selectedBoardId = this.boards.length > 0 && this.boards[0].id ? this.boards[0].id : null;
           this.pageCount = result.getValue()!.pageCount;
         } else {
@@ -52,309 +95,46 @@ export class BoardsStore {
     }
   }
 
-  async createBoard(name: string, description?: string): Promise<void> {
-    this.error = null;
-    try {
-      const result = await BoardsApi.createBoard({ boards: [{ name, description }] });
-      runInAction(() => {
-        if (result.isSuccess()) {
-          const createdBoardData = result.getValue();
-          if (createdBoardData && Array.isArray(createdBoardData) && createdBoardData.length > 0) {
-            const newBoardResponse = createdBoardData[0];
-            if (newBoardResponse && newBoardResponse instanceof CreateBoardResponse && newBoardResponse.getBoards() && Array.isArray(newBoardResponse.getBoards()) && newBoardResponse.getBoards().length > 0) {
-              const newBoard = newBoardResponse.getBoards()[0];
-              if (newBoard) {
-                this.boards.push(newBoard);
-                this.selectedBoardId = newBoard.id ?? null;
-              }
-            }
-          }
-        } else {
-          this.error = result.getError() || 'Erro ao criar board';
-        }
-      });
-    } catch (error: any) {
-      runInAction(() => {
-        this.error = 'Erro ao criar board';
-      });
-    }
-  }
-
-  async updateBoardName(id: string, name: string): Promise<void> {
-    this.error = null;
-    try {
-      const result = await BoardsApi.updateBoard({ id, name });
-      runInAction(() => {
-        if (result.isSuccess()) {
-          const updatedBoard = result.getValue();
-          const boardIndex = this.boards.findIndex(b => b.id === id);
-          if (boardIndex !== -1 && updatedBoard) {
-            this.boards[boardIndex] = updatedBoard;
-          }
-        } else {
-          this.error = result.getError() || 'Erro ao atualizar board';
-        }
-      });
-    } catch (error: any) {
-      runInAction(() => {
-        this.error = 'Erro ao atualizar board';
-      });
-    }
-  }
-
-  async deleteBoard(id: string): Promise<void> {
-    this.error = null;
-    try {
-      const result = await BoardsApi.deleteBoard(id);
-      runInAction(() => {
-        if (result.isSuccess()) {
-          this.boards = this.boards.filter(b => b.id !== id);
-          if (this.selectedBoardId === id) {
-            this.selectedBoardId = this.boards.length > 0 && this.boards[0].id ? this.boards[0].id : null;
-          }
-        } else {
-          this.error = result.getError() || 'Erro ao deletar board';
-        }
-      });
-    } catch (error: any) {
-      runInAction(() => {
-        this.error = 'Erro ao deletar board';
-      });
-    }
-  }
-
+  // --- Selection ---
   selectBoard(id: string | null): void {
     this.selectedBoardId = id;
   }
 
-  async createSwimlane(boardId: string, name: string, order: number): Promise<void> {
-    this.error = null;
-    try {
-      const result = await swimlanesApi.createSwimlane({ swimlanes: [{ boardId, name, order }] });
-
-      if (result.isSuccess()) {
-        const newSwimlane = result.getValue();
-        if (newSwimlane) { // Check if newSwimlane is not null
-          const boardIndex = this.boards.findIndex(b => b.id === boardId);
-          if (boardIndex !== -1) {
-            const board = this.boards[boardIndex];
-            if (board.id && board.createdAtUtc) {
-              const updatedSwimlanes = [...board.getSwimlanes(), newSwimlane]; // newSwimlane is guaranteed to be Swimlane here
-              this.boards[boardIndex] = new Board({
-                id: board.id,
-                createdAtUtc: board.createdAtUtc,
-                updatedAtUtc: new Date(),
-                name: board.getName(),
-                description: board.getDescription(),
-                members: board.getMembers(),
-                swimlanes: updatedSwimlanes,
-              });
-            } else {
-              console.error('Cannot add swimlane: Board ID or creation date missing.');
-              this.error = 'Erro interno ao adicionar lista (dados do board incompletos)';
-            }
-          }
-        } else {
-          this.error = result.getError() || 'Erro ao criar lista';
-        }
-      }
-
-
-    } catch (error: any) {
-      runInAction(() => {
-        this.error = 'Erro ao criar lista';
-      });
-    }
+  // --- Create Operations ---
+  createBoard(name: string, description?: string): Promise<void> {
+    return createBoardOps.createBoard(this, name, description);
   }
 
-  async updateSwimlaneName(id: string, name: string, boardId: string, order: number): Promise<void> {
-    this.error = null;
-    try {
-      const result = await swimlanesApi.updateSwimlane({ swimlanes: [{ boardId, name, order, id }] });
-
-      if (result.isSuccess()) {
-        const updatedSwimlane = result.getValue();
-        if (updatedSwimlane) { // Check if updatedSwimlane is not null
-          this.boards = this.boards.map(board => {
-            const swimlaneIndex = board.getSwimlanes().findIndex(s => s.id === id);
-            if (swimlaneIndex !== -1) {
-              // Check for updatedSwimlane properties inside the null check
-              if (board.id && board.createdAtUtc && updatedSwimlane.id && updatedSwimlane.createdAtUtc) {
-                const updatedSwimlanes = [...board.getSwimlanes()];
-                updatedSwimlanes[swimlaneIndex] = updatedSwimlane; // updatedSwimlane is guaranteed to be Swimlane here
-                return new Board({
-                  id: board.id,
-                  createdAtUtc: board.createdAtUtc,
-                  updatedAtUtc: new Date(),
-                  name: board.getName(),
-                  description: board.getDescription(),
-                  members: board.getMembers(),
-                  swimlanes: updatedSwimlanes,
-                });
-              } else {
-                console.error('Cannot update board: missing ID/date on board or updated swimlane.');
-                return board;
-              }
-            }
-            return board;
-          });
-        } else {
-          this.error = result.getError() || 'Erro ao atualizar lista';
-        }
-      }
-    } catch (error: any) {
-      runInAction(() => {
-        this.error = 'Erro ao atualizar lista';
-      });
-    }
+  createSwimlane(boardId: string, name: string, order: number): Promise<void> {
+    return createSwimlaneOps.createSwimlane(this, boardId, name, order);
   }
 
-  async deleteSwimlane(id: string): Promise<void> {
-    this.error = null;
-    try {
-      const result = await swimlanesApi.deleteSwimlane(id);
-      runInAction(() => {
-        if (result.isSuccess()) {
-          this.boards = this.boards.map(board => {
-            const initialLength = board.getSwimlanes().length;
-            const updatedSwimlanes = board.getSwimlanes().filter((s) => s.id !== id);
-            if (updatedSwimlanes.length < initialLength && board.id && board.createdAtUtc) {
-              return new Board({
-                id: board.id,
-                createdAtUtc: board.createdAtUtc,
-                updatedAtUtc: new Date(),
-                name: board.getName(),
-                description: board.getDescription(),
-                members: board.getMembers(),
-                swimlanes: updatedSwimlanes,
-              });
-            }
-            return board;
-          });
-        } else {
-          this.error = result.getError() || 'Erro ao deletar lista';
-        }
-      });
-    } catch (error: any) {
-      runInAction(() => {
-        this.error = 'Erro ao deletar lista';
-      });
-    }
+  createTask(swimlaneId: string, name: string, description?: string): Promise<void> {
+    // Assuming createTask remains in create.boards.ts for now
+    return createBoardOps.createTask(this, swimlaneId, name, description);
   }
 
-  async createTask(swimlaneId: string, name: string, description?: string): Promise<void> {
-    this.error = null;
-    try {
-      const result = await tasksApi.createTask({ swimlaneId, name, description });
-      if (result.isSuccess()) {
-        const newTask = result.getValue();
-        if (newTask) { // Check if newTask is not null
-          this.boards = this.boards.map(board => {
-            let boardNeedsUpdate = false;
-            const updatedSwimlanes = board.getSwimlanes().map(swimlane => {
-              if (swimlane.id === swimlaneId) {
-                // Check for newTask properties inside the null check
-                if (swimlane.id && swimlane.createdAtUtc && newTask.id && newTask.createdAtUtc) {
-                  boardNeedsUpdate = true;
-                  const updatedTasks = [...swimlane.getTasks(), newTask]; // newTask is guaranteed to be Task here
-                  return new Swimlane({
-                    id: swimlane.id,
-                    createdAtUtc: swimlane.createdAtUtc,
-                    updatedAtUtc: new Date(),
-                    boardId: swimlane.getBoardId(),
-                    name: swimlane.getName(),
-                    order: swimlane.getOrder(),
-                    tasks: updatedTasks,
-                  });
-                } else {
-                  console.error('Cannot add task: missing ID/date on swimlane or new task.');
-                  return swimlane;
-                }
-              }
-              return swimlane;
-            });
-
-            if (boardNeedsUpdate && board.id && board.createdAtUtc) {
-              return new Board({
-                id: board.id,
-                createdAtUtc: board.createdAtUtc,
-                updatedAtUtc: new Date(),
-                name: board.getName(),
-                description: board.getDescription(),
-                members: board.getMembers(),
-                swimlanes: updatedSwimlanes,
-              });
-            }
-            return board;
-          });
-        } else {
-          this.error = result.getError() || 'Erro ao criar cartão';
-        }
-      }
-    } catch (error: any) {
-      runInAction(() => {
-        this.error = 'Erro ao criar cartão';
-      });
-    }
+  // --- Update/Delete Operations ---
+  updateBoardName(id: string, name: string, description?: string): Promise<void> {
+    return updateBoardOps.updateBoardName(this, id, name, description);
   }
 
-  async deleteTask(taskId: string, swimlaneId: string): Promise<void> {
-    this.error = null;
-    try {
-      const result = await tasksApi.deleteTask(taskId);
-      runInAction(() => {
-        if (result.isSuccess()) {
-          this.boards = this.boards.map(board => {
-            let boardNeedsUpdate = false;
-            const updatedSwimlanes = board.getSwimlanes().map(swimlane => {
-              if (swimlane.id === swimlaneId) {
-                const initialTaskLength = swimlane.getTasks().length;
-                const updatedTasks = swimlane.getTasks().filter((t) => t.id !== taskId);
-                if (updatedTasks.length < initialTaskLength) {
-                  if (swimlane.id && swimlane.createdAtUtc) {
-                    boardNeedsUpdate = true;
-                    return new Swimlane({
-                      id: swimlane.id,
-                      createdAtUtc: swimlane.createdAtUtc,
-                      updatedAtUtc: new Date(),
-                      boardId: swimlane.getBoardId(),
-                      name: swimlane.getName(),
-                      order: swimlane.getOrder(),
-                      tasks: updatedTasks,
-                    });
-                  } else {
-                    console.error('Cannot update swimlane after task delete: missing ID/date on swimlane.');
-                    return swimlane;
-                  }
-                }
-              }
-              return swimlane;
-            });
-
-            if (boardNeedsUpdate && board.id && board.createdAtUtc) {
-              return new Board({
-                id: board.id,
-                createdAtUtc: board.createdAtUtc,
-                updatedAtUtc: new Date(),
-                name: board.getName(),
-                description: board.getDescription(),
-                members: board.getMembers(),
-                swimlanes: updatedSwimlanes,
-              });
-            }
-            return board;
-          });
-        } else {
-          this.error = result.getError() || 'Erro ao deletar cartão';
-        }
-      });
-    } catch (error: any) {
-      runInAction(() => {
-        this.error = 'Erro ao deletar cartão';
-      });
-    }
+  deleteBoard(ids: string[]): Promise<void> {
+    return updateBoardOps.deleteBoard(this, ids);
   }
 
+  updateSwimlaneName(id: string, name: string, boardId: string, order: number): Promise<void> {
+    return updateSwimlaneOps.updateSwimlaneName(this, id, name, boardId, order);
+  }
+
+  deleteSwimlane(id: string): Promise<void> {
+    return updateSwimlaneOps.deleteSwimlane(this, id);
+  }
+
+  deleteTask(taskId: string, swimlaneId: string): Promise<void> {
+    // Assuming deleteTask remains in update.boards.ts for now
+    return updateBoardOps.deleteTask(this, taskId, swimlaneId);
+  }
 }
 
 const boardsStore = new BoardsStore();

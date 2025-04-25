@@ -2,10 +2,10 @@ import { EntityMutable } from "../core/entity-mutable.mode";
 import { Task } from "./task.model";
 
 export class Swimlane extends EntityMutable {
-  private boardId: string;
-  private name: string;
-  private order: number;
-  private tasks: Task[];
+  boardId: string;
+  name: string;
+  order: number;
+  tasks: Task[];
 
   constructor(params: {
     id: string,
@@ -17,6 +17,7 @@ export class Swimlane extends EntityMutable {
     tasks?: Task[],
   }) {
     super(params);
+    if (!params) return;
     this.boardId = params.boardId;
     this.name = params.name;
     this.order = params.order;
