@@ -12,7 +12,6 @@ import * as updateSwimlaneOps from './update.swimlanes'; // Import swimlane upda
 
 export class BoardsStore {
   boards: Board[] = [];
-  selectedBoardId: string | null = null;
   loading: boolean = true;
   error: string | null = null;
   pageCount: number = 0;
@@ -22,12 +21,13 @@ export class BoardsStore {
     this.fetchBoards();
   }
 
-  get selectedBoard(): Board | null {
-    if (!this.selectedBoardId) return null;
-    return this.boards.find(b => b.id === this.selectedBoardId) || null;
-  }
-
-  async fetchBoards(): Promise<void> {
+  async fetchBoards(params?: {
+    ids?: string[];
+    page?: number;
+    pageSize?: number;
+    populateWithSwimlanes?: boolean;
+    populateWithMembers?: boolean;
+  }): Promise<void> {
     this.loading = true;
     this.error = null;
     try {
@@ -80,7 +80,6 @@ export class BoardsStore {
               })
             })
           }
-          this.selectedBoardId = this.boards.length > 0 && this.boards[0].id ? this.boards[0].id : null;
           this.pageCount = result.getValue()!.pageCount;
         } else {
           this.error = result.getError() || 'Erro ao buscar boards';
@@ -93,11 +92,6 @@ export class BoardsStore {
         this.loading = false;
       });
     }
-  }
-
-  // --- Selection ---
-  selectBoard(id: string | null): void {
-    this.selectedBoardId = id;
   }
 
   // --- Create Operations ---

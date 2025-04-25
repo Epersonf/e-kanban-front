@@ -22,6 +22,7 @@ export class BoardsApi {
 
   private static axios = KanbanAPiRequest.getAxios();
   static async getBoards(params: {
+    ids?: string[];
     page: number;
     pageSize: number;
     populateWithSwimlanes: boolean;

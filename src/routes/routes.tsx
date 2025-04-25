@@ -12,7 +12,7 @@ function MainRoutes(): JSX.Element {
 
       //TODO fazer rotas protegidas abaixo
       <Route path="/boards" element={<BoardsPage />} />
-      <Route path="/board/:id" element={<SingleBoardPage />} />
+      <Route path="/boards/:boardId" element={<SingleBoardPage />} />
 
 
     </Routes>

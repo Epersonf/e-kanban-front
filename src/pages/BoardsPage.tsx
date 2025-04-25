@@ -9,13 +9,18 @@ import AddListButton from "../components/AddListButton";
 import AddCardModal from "../components/AddCardModal";
 import { FiEdit } from "react-icons/fi";
 import boardsStore from "../stores/boards.store"; // Import the store instance
+import singleBoardStore from "../stores/single-board.store"; // Import the single board store instance
 import { Task } from "../models/general/task.model"; // Import Task model
 import { Swimlane } from "../models/general/swimlane.model"; // Import Swimlane model
+import { Board } from "../models/general/board.model"; // Import Board model
 import styles from './BoardsPage.module.css'; // Import the CSS module
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 // Remove local BoardType interface if Board model from store is used directly
 
 export const BoardsPage: React.FC = observer(() => { // Wrap component with observer
+  const navigate = useNavigate(); // Get the navigate function
+
   // Local UI state remains
   const [showAddCardModal, setShowAddCardModal] = useState(false);
   const [targetListId, setTargetListId] = useState<string | null>(null); // Use string for ID
@@ -25,8 +30,9 @@ export const BoardsPage: React.FC = observer(() => { // Wrap component with obse
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editingTitle, setEditingTitle] = useState('');
 
-  // Get data from the store
-  const { boards, selectedBoardId, loading, error, selectedBoard } = boardsStore;
+  // Get data from the stores
+  const { boards, loading, error } = boardsStore;
+  const { selectedBoard } = singleBoardStore;
 
   // Update local editing title when selected board changes
   React.useEffect(() => {
@@ -47,17 +53,21 @@ export const BoardsPage: React.FC = observer(() => { // Wrap component with obse
   };
 
   const handleSelectBoard = (id: string | null) => { // ID is string
-    boardsStore.selectBoard(id);
+    const boardToSelect = boards.find(board => board.id === id) || null;
+    singleBoardStore.setBoard(boardToSelect);
+    if (id) {
+      navigate(`/boards/${id}`); // Navigate to the single board page
+    }
   };
 
   const handleSaveBoardTitle = () => {
-    if (!selectedBoardId || !editingTitle.trim() || !selectedBoard) {
+    if (!selectedBoard?.id || !editingTitle.trim() || !selectedBoard) {
       setIsEditingTitle(false);
       setEditingTitle(selectedBoard?.getName() || ''); // Revert to original name
       return;
     }
     if (editingTitle.trim() !== selectedBoard.getName()) {
-      boardsStore.updateBoardName(selectedBoardId, editingTitle.trim(), selectedBoard.getDescription());
+      boardsStore.updateBoardName(selectedBoard.id, editingTitle.trim(), selectedBoard.getDescription());
     }
     setIsEditingTitle(false);
   };
@@ -69,16 +79,16 @@ export const BoardsPage: React.FC = observer(() => { // Wrap component with obse
 
   // Swimlane (List) Handlers
   const handleAddList = async () => {
-    if (!selectedBoardId) return;
+    if (!selectedBoard?.id) return;
     const name = prompt('Nome da nova lista:') || '';
     if (!name.trim()) return;
-    await boardsStore.createSwimlane(selectedBoardId, name.trim(), boards.length);
+    await boardsStore.createSwimlane(selectedBoard.id, name.trim(), selectedBoard.getSwimlanes().length); // Use selectedBoard's swimlanes length
   };
 
   // Note: UpdateList handler was missing in original, assuming it's needed for List component title editing
   const handleUpdateList = (listId: string, name: string, order: number) => { // ID is string
-    if (!name.trim()) return; // Prevent empty names
-    boardsStore.updateSwimlaneName(listId, name.trim(), selectedBoardId!, order);
+    if (!name.trim() || !selectedBoard?.id) return; // Prevent empty names and ensure board is selected
+    boardsStore.updateSwimlaneName(listId, name.trim(), selectedBoard.id, order);
   };
 
 
@@ -89,6 +99,7 @@ export const BoardsPage: React.FC = observer(() => { // Wrap component with obse
 
   // Task (Card) Handlers
   const handleOpenAddCard = (listId: string) => { // ID is string
+    if (!selectedBoard?.id) return; // Ensure board is selected
     setTargetListId(listId);
     setShowAddCardModal(true);
   };
@@ -136,21 +147,21 @@ export const BoardsPage: React.FC = observer(() => { // Wrap component with obse
   };
 
   const adaptSelectedBoardIdForMenu = () => {
-    return selectedBoardId ? parseInt(selectedBoardId, 10) : null;
+    return selectedBoard?.id ? parseInt(selectedBoard.id, 10) : null;
   };
 
   const handleSelectBoardFromMenu = (id: number) => { // BoardMenu returns number
     handleSelectBoard(id.toString()); // Convert back to string for store
   };
 
-  const adaptListForListComponent = (list: Swimlane) => {
+  const adaptListForListComponent = (list: Swimlane): any => { // Explicitly type list and return type
     return {
       id: parseInt(list.id ?? '0', 10), // Convert string ID to number
-      title: list.getName(),
-      cards: list.getTasks().map((task: Task) => ({ // Add explicit Task type
+      title: list.name!,
+      cards: list.tasks!.map((task: Task) => ({ // Add explicit Task type
         id: parseInt(task.id ?? '0', 10), // Convert string ID to number
-        title: task.getName(),
-        description: task.getDescription() ?? ''
+        title: task.name!,
+        description: task.description! ?? ''
         // Adapt other Task properties if CardType expects them
       }))
     };
@@ -213,7 +224,7 @@ export const BoardsPage: React.FC = observer(() => { // Wrap component with obse
                   <FiEdit size={18} />
                 </button>
               )}
-              {selectedBoard.id && ( // Only show delete if board exists
+              {selectedBoard?.id && ( // Only show delete if board exists
                 <button
                   onClick={() => handleDeleteBoard([selectedBoard.id!])} // Use non-null assertion or check id
                   className={styles["delete-button"]}
@@ -223,7 +234,7 @@ export const BoardsPage: React.FC = observer(() => { // Wrap component with obse
             </div>
             {/* Horizontal scroll for lists */}
             <div className={styles["lists-container"]}>
-              {selectedBoard.getSwimlanes() && selectedBoard.getSwimlanes().map(list => (
+              {selectedBoard.getSwimlanes() && selectedBoard.getSwimlanes().map((list: Swimlane) => ( // Explicitly type list
                 <div
                   key={list.id} // Use list.id
                   // onDragOver={(e) => {

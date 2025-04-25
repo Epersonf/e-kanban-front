@@ -27,8 +27,7 @@ export async function createBoard(store: BoardsStore, name: string, description?
               members: [],
               swimlanes: [],
             })
-            store.boards.push(newBoard);
-            store.selectedBoardId = newBoard.id!;
+            store.boards.splice(store.boards.length, 0, newBoard); // Use splice for potentially better reactivity
           }
         }
       } else {

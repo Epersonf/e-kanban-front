@@ -47,9 +47,6 @@ export async function deleteBoard(store: BoardsStore, ids: string[]): Promise<vo
     runInAction(() => {
       if (result.isSuccess()) {
         store.boards = store.boards.filter(b => !ids.includes(b.id!)); // Handle multiple IDs if needed
-        if (ids.includes(store.selectedBoardId!)) {
-          store.selectedBoardId = store.boards.length > 0 && store.boards[0].id ? store.boards[0].id : null;
-        }
       } else {
         store.error = result.getError() || 'Erro ao deletar board(s)';
       }
