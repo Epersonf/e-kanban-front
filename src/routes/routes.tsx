@@ -1,6 +1,6 @@
 import { JSX } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
-import LoginPage from "../pages/login/LoginPage";
+import LoginPage from "../pages/LoginPage"; // Updated import path
 import { BoardsPage } from "../pages/BoardsPage";
 import { SingleBoardPage } from "../pages/SingleBoardPage";
 

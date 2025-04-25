@@ -5,10 +5,10 @@ import { Task } from '../models/general/task.model';
 import { BoardsApi } from '../infra/api/boards.api';
 import { parseApiDate } from '../utils/parse-api-date.utils';
 import { User } from '../models/general/user.model';
-import * as createBoardOps from './create.boards'; // Import board create operations
-import * as updateBoardOps from './update.boards'; // Import board update/delete operations
-import * as createSwimlaneOps from './create.swimlanes'; // Import swimlane create operations
-import * as updateSwimlaneOps from './update.swimlanes'; // Import swimlane update/delete operations
+import * as createBoardOps from './create.boards';
+import * as updateBoardOps from './update.boards';
+import * as createSwimlaneOps from './create.swimlanes';
+import * as updateSwimlaneOps from './update.swimlanes';
 
 export class BoardsStore {
   boards: Board[] = [];
