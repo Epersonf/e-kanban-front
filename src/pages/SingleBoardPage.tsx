@@ -11,7 +11,21 @@ import AddCardModal from '../components/AddCardModal'; // Assuming AddCardModal 
 import { FiEdit } from 'react-icons/fi'; // Assuming edit icon is needed
 import { Swimlane } from '../models/general/swimlane.model'; // Import Swimlane model
 import { Task } from '../models/general/task.model'; // Import Task model
-import styles from './BoardsPage.module.css'; // Reuse the same CSS module for now
+import {
+  BoardsPageContainer,
+  MainContent,
+  HeaderContainer,
+  StatusMessage,
+  BoardContent,
+  BoardTitleArea,
+  BoardTitle,
+  TitleInput,
+  EditButton,
+  DeleteButton,
+  ListsContainer,
+  ListWrapper,
+  AddCardButton,
+} from './BoardsPage/styles'; // Import styled components
 
 export const SingleBoardPage: React.FC = observer(() => {
   const { boardId } = useParams<{ boardId: string }>();
@@ -114,31 +128,30 @@ export const SingleBoardPage: React.FC = observer(() => {
 
   // --- Rendering ---
   return (
-    <div className={styles["boards-page"]}> {/* Reuse boards-page styling for layout */}
+    <BoardsPageContainer> {/* Reuse boards-page styling for layout */}
       {/* BoardMenu is not needed on the single board page */}
-      <div className={styles["main-content"]}> {/* Reuse main-content styling */}
-        <div className={styles["header-container"]}>
+      <MainContent> {/* Reuse main-content styling */}
+        <HeaderContainer>
           <Header />
           {/* ProfileMenu might be needed */}
           {/* <ProfileMenu userName={userName} onLogout={handleLogout} /> */}
-        </div>
+        </HeaderContainer>
         {loading ? (
-          <div className={styles["status-message"]}>Carregando board...</div>
+          <StatusMessage>Carregando board...</StatusMessage>
         ) : error ? (
-          <div className={`${styles["status-message"]} ${styles.error}`}>Erro: {error}</div>
+          <StatusMessage className="error">Erro: {error}</StatusMessage>
         ) : selectedBoard ? (
-          <div className={styles["board-content"]}> {/* Allow vertical scroll for content */}
-            <div className={styles["board-title-area"]}>
+          <BoardContent> {/* Allow vertical scroll for content */}
+            <BoardTitleArea>
               {/* Title editing logic will be moved here */}
-              <h2 className={styles["board-title"]}>{selectedBoard.getName()}</h2>
+              <BoardTitle>{selectedBoard.getName()}</BoardTitle>
               {/* Edit and Delete buttons will be moved here */}
-            </div>
+            </BoardTitleArea>
             {/* Horizontal scroll for lists */}
-            <div className={styles["lists-container"]}>
+            <ListsContainer>
               {selectedBoard.getSwimlanes() && selectedBoard.getSwimlanes().map((list: Swimlane) => ( // Explicitly type list
-                <div
+                <ListWrapper
                   key={list.id} // Use list.id
-                  className={styles["list-wrapper"]} // Prevent lists shrinking
                 >
                   {/* Pass adapted list data */}
                   <List
@@ -152,19 +165,18 @@ export const SingleBoardPage: React.FC = observer(() => {
                       console.warn("Card update not implemented in store yet", cardId.toString(), updatedData);
                     }}
                   />
-                  <button
-                    className={styles["add-card-button"]}
+                  <AddCardButton
                     onClick={() => handleOpenAddCard(list.id!)} // Use non-null assertion or check id
                   >
                     + Adicionar cartão
-                  </button>
-                </div>
+                  </AddCardButton>
+                </ListWrapper>
               ))}
               <AddListButton onClick={handleAddList} />
-            </div>
-          </div>
+            </ListsContainer>
+          </BoardContent>
         ) : (
-          <div className={styles["status-message"]}>Board não encontrado.</div>
+          <StatusMessage>Board não encontrado.</StatusMessage>
         )}
         {/* AddCardModal will be moved here */}
         {/* <AddCardModal
@@ -172,7 +184,7 @@ export const SingleBoardPage: React.FC = observer(() => {
           onClose={() => { setShowAddCardModal(false); setTargetListId(null); }}
           onAdd={handleAddCard}
         /> */}
-      </div>
-    </div>
+      </MainContent>
+    </BoardsPageContainer>
   );
 });

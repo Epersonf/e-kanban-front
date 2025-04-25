@@ -1,18 +1,18 @@
 import React, { useState } from "react"; // Keep useState for local UI state like modals, editing title
 import { observer } from "mobx-react-lite";
-import List from "../components/List"; // Assuming List component is compatible with Swimlane model
+import List from "../../components/List"; // Assuming List component is compatible with Swimlane model
 // import { CardType } from "../components/Card"; // CardType might need adjustment or use Task model directly in Card component
-import BoardMenu from "../components/BoardMenu";
-import Header from "../components/Header";
-import ProfileMenu from "../components/common/ProfileMenu";
-import AddListButton from "../components/AddListButton";
-import AddCardModal from "../components/AddCardModal";
+import BoardMenu from "../../components/BoardMenu";
+import Header from "../../components/Header";
+import ProfileMenu from "../../components/common/ProfileMenu";
+import AddListButton from "../../components/AddListButton";
+import AddCardModal from "../../components/AddCardModal";
 import { FiEdit } from "react-icons/fi";
-import boardsStore from "../stores/boards.store"; // Import the store instance
-import singleBoardStore from "../stores/single-board.store"; // Import the single board store instance
-import { Task } from "../models/general/task.model"; // Import Task model
-import { Swimlane } from "../models/general/swimlane.model"; // Import Swimlane model
-import { Board } from "../models/general/board.model"; // Import Board model
+import boardsStore from "../../stores/boards.store"; // Import the store instance
+import singleBoardStore from "../../stores/single-board.store"; // Import the single board store instance
+import { Task } from "../../models/general/task.model"; // Import Task model
+import { Swimlane } from "../../models/general/swimlane.model"; // Import Swimlane model
+import { Board } from "../../models/general/board.model"; // Import Board model
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import {
   BoardsPageContainer,
@@ -28,7 +28,7 @@ import {
   ListsContainer,
   ListWrapper,
   AddCardButton,
-} from './BoardsPage/styles'; // Import styled components
+} from '../BoardsPage/styles'; // Import styled components
 
 // Remove local BoardType interface if Board model from store is used directly
 
