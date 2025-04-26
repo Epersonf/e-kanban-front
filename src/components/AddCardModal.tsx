@@ -17,6 +17,10 @@ const AddCardModal: React.FC<AddCardModalProps> = ({ isOpen, onClose, onAdd }) =
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
+    if (!description.trim()) {
+      alert('é necessario ter um descricao');
+      return; 
+    }
     onAdd({ title, description });
     setTitle('');
     setDescription('');

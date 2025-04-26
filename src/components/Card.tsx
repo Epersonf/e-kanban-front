@@ -2,14 +2,6 @@ import React from 'react';
 import { Task } from '../models/general/task.model';
 import { User } from '../models/general/user.model';
 
-export interface MemberType {
-  id: string;
-  name: string;
-  avatarUrl?: string;
-}
-
-
-
 interface CardProps {
   card: Task;
   owners: User[];

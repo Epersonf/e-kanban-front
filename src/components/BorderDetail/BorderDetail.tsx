@@ -111,6 +111,7 @@ export const BoardDetail: React.FC<BoardDetailProps> = observer(
         onAddCard(targetListId, data);
         setShowAddCardModal(false);
         setTargetListId(null);
+        onUpdateCard('', targetListId, { name: data.title, description: data.description });
       },
       [targetListId, onAddCard]
     );
