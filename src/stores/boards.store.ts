@@ -9,6 +9,7 @@ import * as createBoardOps from './create.boards';
 import * as updateBoardOps from './update.boards';
 import * as createSwimlaneOps from './create.swimlanes';
 import * as updateSwimlaneOps from './update.swimlanes';
+import tasksApi from '../infra/api/tasks.api'; // Importar a instância da API de Tasks
 
 export class BoardsStore {
   boards: Board[] = [];
@@ -94,28 +95,108 @@ export class BoardsStore {
     }
   }
 
-  // Em boards.store.ts (ou update.tasks.ts / move.tasks.ts)
-async moveTask(
-  taskId: string,
-  sourceListId: string,
-  sourceIndex: number,
-  destinationListId: string,
-  destinationIndex: number
-): Promise<void> {
-  // 1. Atualização Otimista (Opcional, mas melhora UX):
-  //    - Mova o task no estado *antes* da chamada da API (dentro de runInAction).
-  //    - Reordene os arrays `tasks` nas swimlanes afetadas.
-  //
-  // 2. Chamar API:
-  //    - Você precisará de um endpoint na API (ex: PATCH /tasks/{taskId}/move)
-  //      que receba o novo `swimlaneId` e a nova `order` (ou índice).
-  //    - Chame `tasksApi.moveTask(...)` (crie este método).
-  //
-  // 3. Lidar com Resposta/Erro:
-  //    - Se a API falhar, reverta a atualização otimista (mais complexo).
-  //    - Se a API suceder e retornar dados atualizados (ex: novas ordens),
-  //      atualize o estado com os dados da API (se diferente da otimista).
-}
+  async moveTask(
+    taskId: string,
+    sourceSwimlaneId: string,
+    sourceIndex: number,
+    destinationSwimlaneId: string,
+    destinationIndex: number
+  ): Promise<void> {
+    // Encontrar o board que contém as swimlanes
+    const board = this.boards.find(b =>
+      b.swimlanes.some(s => s.id === sourceSwimlaneId || s.id === destinationSwimlaneId)
+    );
+    if (!board) {
+      console.error("Board not found for swimlanes:", sourceSwimlaneId, destinationSwimlaneId);
+      this.error = "Erro ao mover task: Board não encontrado.";
+      return;
+    }
+
+    const sourceSwimlane = board.swimlanes.find(s => s.id === sourceSwimlaneId);
+    const destinationSwimlane = board.swimlanes.find(s => s.id === destinationSwimlaneId);
+
+    if (!sourceSwimlane || !destinationSwimlane) {
+      console.error("Source or destination swimlane not found");
+      this.error = "Erro ao mover task: Swimlane de origem ou destino não encontrada.";
+      return;
+    }
+
+    // --- Atualização Otimista ---
+    let movedTask: Task | undefined;
+    runInAction(() => {
+      // Remover da origem
+      // Certifique-se que a task existe antes de tentar remover
+      if (sourceSwimlane.tasks.length <= sourceIndex || sourceSwimlane.tasks[sourceIndex].id !== taskId) {
+         console.error(`Task ${taskId} not found at source index ${sourceIndex} in swimlane ${sourceSwimlaneId}`);
+         this.error = "Erro interno ao mover task: Task não encontrada na posição esperada.";
+         movedTask = undefined; // Marca que a operação falhou
+         return; // Sai do runInAction
+      }
+      movedTask = sourceSwimlane.tasks.splice(sourceIndex, 1)[0];
+
+      // Adicionar ao destino
+      destinationSwimlane.tasks.splice(destinationIndex, 0, movedTask);
+
+      // Atualizar swimlaneId no task movido (importante se mudou de lista)
+      movedTask.swimlaneId = destinationSwimlaneId;
+
+      // Opcional: Reordenar localmente se a API não retornar a ordem exata
+      // destinationSwimlane.tasks.forEach((task, index) => task.order = index);
+      // sourceSwimlane.tasks.forEach((task, index) => task.order = index); // Se a ordem na origem também muda
+    });
+
+    // Se a atualização otimista falhou (task não encontrada no índice)
+    if (!movedTask) return;
+
+    // --- Chamar API ---
+    // Não setar loading/error global aqui para não afetar toda a UI,
+    // a menos que seja desejado um feedback global.
+    // this.loading = true;
+    // this.error = null;
+    try {
+      // Usar a instância importada tasksApi
+      const result = await tasksApi.updateTask({
+        id: taskId,
+        swimlaneId: destinationSwimlaneId,
+        // Opcional: Enviar a nova ordem se a API precisar/suportar
+        // order: destinationIndex,
+      });
+
+      if (result.isError()) {
+        runInAction(() => {
+          this.error = result.getError() || 'Erro ao atualizar task na API.';
+          console.error("API Error, reverting optimistic update:", this.error);
+          // **Reverter Atualização Otimista**
+          // 1. Remover do destino
+          destinationSwimlane.tasks.splice(destinationIndex, 1);
+          // 2. Adicionar de volta à origem
+          sourceSwimlane.tasks.splice(sourceIndex, 0, movedTask!);
+          // 3. Restaurar swimlaneId original
+          movedTask!.swimlaneId = sourceSwimlaneId;
+          // 4. Opcional: Restaurar ordem local se foi modificada otimisticamente
+        });
+      } else {
+        // Sucesso! O estado já está (otimisticamente) correto.
+        // Se a API retornar o task atualizado com mais dados (ex: updatedAtUtc, nova ordem),
+        // você pode atualizar o objeto `movedTask` aqui dentro de um runInAction.
+        // Ex: runInAction(() => Object.assign(movedTask, result.getValue()));
+        console.log(`Task ${taskId} moved successfully via API to swimlane ${destinationSwimlaneId}`);
+      }
+      // runInAction(() => { this.loading = false; });
+
+    } catch (error: any) {
+      runInAction(() => {
+        this.error = 'Erro inesperado ao mover task.';
+        // this.loading = false;
+        console.error("Unexpected Error, reverting optimistic update:", error);
+        // **Reverter Atualização Otimista também em caso de exceção**
+        destinationSwimlane.tasks.splice(destinationIndex, 1);
+        sourceSwimlane.tasks.splice(sourceIndex, 0, movedTask!);
+        movedTask!.swimlaneId = sourceSwimlaneId;
+        // Opcional: Restaurar ordem local
+      });
+    }
+  }
 
   // --- Create Operations ---
   createBoard(name: string, description?: string): Promise<void> {
