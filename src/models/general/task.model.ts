@@ -4,6 +4,7 @@ export class Task extends EntityMutable {
   swimlaneId: string;
   name: string;
   description?: string;
+  ownerIds?: string[];
   
   constructor(params: {
     id: string,
@@ -12,11 +13,13 @@ export class Task extends EntityMutable {
     swimlaneId: string,
     name: string,
     description?: string
+    ownerIds?: string[]
   }) {
     super(params);
     this.swimlaneId = params.swimlaneId;
     this.name = params.name;
     this.description = params.description;
+    this.ownerIds = params.ownerIds;
   }
 
   public getSwimlaneId(): string {
@@ -29,5 +32,9 @@ export class Task extends EntityMutable {
 
   public getDescription(): string | undefined {
     return this.description;
+  }
+
+  public getOwnerIds(): string[] | undefined {
+    return this.ownerIds;
   }
 }

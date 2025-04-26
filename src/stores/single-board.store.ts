@@ -1,50 +1,50 @@
-import { makeAutoObservable, runInAction } from 'mobx';
+// src/stores/single-board.store.ts
+import { makeAutoObservable, computed, runInAction } from 'mobx';
+import boardsStore from './boards.store'; // Importar a store principal
 import { Board } from '../models/general/board.model';
-import { BoardsApi } from '../infra/api/boards.api';
 
 export class SingleBoardStore {
-  selectedBoard: Board | null = null;
-  loading: boolean = false; // Add loading state if fetching single board becomes necessary
-  error: string | null = null; // Add error state
+    selectedBoardId: string | null = null;
+    // loading/error próprios não são mais necessários aqui para buscar o board
+    // mas podem ser úteis se houver ações *específicas* do single board no futuro
 
-  constructor() {
-    makeAutoObservable(this);
-  }
-
-  setBoard(board: Board | null): void {
-    this.selectedBoard = board;
-    // Reset loading/error when setting a new board
-    this.loading = false;
-    this.error = null;
-  }
-
-  // Optional: Add a method to fetch a single board by ID if needed later
-  async fetchBoard(ids: string[]): Promise<void> {
-    this.loading = true;
-    this.error = null;
-    try {
-      const result = await BoardsApi.getBoards({
-        ids,
-        page: 1,
-        pageSize: 10,
-        populateWithSwimlanes: true,
-        populateWithMembers: true
-      }); // Assuming a getBoard method exists in BoardsApi
-      runInAction(() => {
-        if (result.isSuccess()) {
-          this.selectedBoard = result.getValue()!.items[0];
-        } else {
-          this.error = result.getError() || 'Erro ao buscar board';
-        }
-        this.loading = false;
-      });
-    } catch (error: any) {
-      runInAction(() => {
-        this.error = 'Erro ao buscar board';
-        this.loading = false;
-      });
+    constructor() {
+        makeAutoObservable(this, {
+            selectedBoard: computed // Derivar o board da store principal
+        });
     }
-  }
+
+    setSelectedBoardId(id: string | null): void {
+        // Se o ID for o mesmo, não faz nada (evita re-renders desnecessários)
+        // if (id === this.selectedBoardId) return;
+        runInAction(() => {
+            this.selectedBoardId = id;
+        })
+    }
+
+    // Computed property para obter o board completo
+    get selectedBoard(): Board | null {
+        if (!this.selectedBoardId) {
+            return null;
+        }
+        // Encontra o board na store principal
+        const board = boardsStore.boards.find(b => b.id === this.selectedBoardId);
+        // console.log(`Computed selectedBoard for ID ${this.selectedBoardId}:`, board ? board.getName() : 'Not found');
+        return board || null;
+    }
+
+    // O método setBoard pode ser mantido se houver casos de uso para definir
+    // um board diretamente, mas seu uso primário agora é via setSelectedBoardId.
+    setBoard(board: Board | null): void {
+        // console.log("Setting board directly:", board?.getName());
+         runInAction(() => {
+           this.selectedBoardId = board?.id ?? null;
+         });
+         // Opcional: Adicionar/atualizar em boardsStore se necessário (ver sugestão original)
+    }
+
+   // Remover fetchBoard - não busca mais aqui
+   // async fetchBoard(ids: string[]): Promise<void> { ... }
 }
 
 const singleBoardStore = new SingleBoardStore();

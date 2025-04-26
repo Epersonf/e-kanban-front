@@ -94,6 +94,29 @@ export class BoardsStore {
     }
   }
 
+  // Em boards.store.ts (ou update.tasks.ts / move.tasks.ts)
+async moveTask(
+  taskId: string,
+  sourceListId: string,
+  sourceIndex: number,
+  destinationListId: string,
+  destinationIndex: number
+): Promise<void> {
+  // 1. Atualização Otimista (Opcional, mas melhora UX):
+  //    - Mova o task no estado *antes* da chamada da API (dentro de runInAction).
+  //    - Reordene os arrays `tasks` nas swimlanes afetadas.
+  //
+  // 2. Chamar API:
+  //    - Você precisará de um endpoint na API (ex: PATCH /tasks/{taskId}/move)
+  //      que receba o novo `swimlaneId` e a nova `order` (ou índice).
+  //    - Chame `tasksApi.moveTask(...)` (crie este método).
+  //
+  // 3. Lidar com Resposta/Erro:
+  //    - Se a API falhar, reverta a atualização otimista (mais complexo).
+  //    - Se a API suceder e retornar dados atualizados (ex: novas ordens),
+  //      atualize o estado com os dados da API (se diferente da otimista).
+}
+
   // --- Create Operations ---
   createBoard(name: string, description?: string): Promise<void> {
     return createBoardOps.createBoard(this, name, description);

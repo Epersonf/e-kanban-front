@@ -1,26 +1,24 @@
 import React from 'react';
+import { Task } from '../models/general/task.model';
+import { User } from '../models/general/user.model';
 
 export interface MemberType {
-  id: number;
+  id: string;
   name: string;
   avatarUrl?: string;
 }
 
-export interface CardType {
-  id: number;
-  title: string;
-  description: string;
-  members?: MemberType[];
-}
+
 
 interface CardProps {
-  card: CardType;
+  card: Task;
+  owners: User[];
   onDelete: () => void;
   onClick?: () => void;
   draggableProps?: React.HTMLAttributes<HTMLDivElement>;
 }
 
-const Card: React.FC<CardProps> = ({ card, onDelete, onClick, draggableProps }) => (
+const Card: React.FC<CardProps> = ({ card, owners, onDelete, onClick, draggableProps }) => (
   <div
     {...draggableProps}
     style={{
@@ -43,14 +41,14 @@ const Card: React.FC<CardProps> = ({ card, onDelete, onClick, draggableProps }) 
     onClick={onClick}
   >
     <div style={{ flex: 1 }}>
-      <div style={{ fontWeight: 600, fontSize: 16 }}>{card.title}</div>
+      <div style={{ fontWeight: 600, fontSize: 16 }}>{card.name}</div>
       <div style={{ fontSize: 13, color: '#555', fontWeight: 400 }}>{card.description}</div>
-      {card.members && card.members.length > 0 && (
+      {owners && owners.length > 0 && (
         <div style={{ display: 'flex', gap: 4, marginTop: 6 }}>
-          {card.members.map(member => (
+          {owners.map(member => (
             <img
               key={member.id}
-              src={member.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}`}
+              // src={member.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}`}
               alt={member.name}
               title={member.name}
               style={{ width: 24, height: 24, borderRadius: '50%', border: '1px solid #eee', objectFit: 'cover' }}

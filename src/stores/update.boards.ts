@@ -13,26 +13,16 @@ export async function updateBoardName(store: BoardsStore, id: string, name: stri
     runInAction(() => {
       if (result.isSuccess()) {
         const updatedBoardData = result.getValue();
-        const boardIndex = store.boards.findIndex(b => b.id === id);
-        if (boardIndex !== -1 && updatedBoardData) {
-          const existingBoard = store.boards[boardIndex];
-          if (!existingBoard) return;
-          const updatedBoard = new Board({
-            ...existingBoard,
-            id: updatedBoardData.id!,
-            name: updatedBoardData.name!,
-            createdAtUtc: existingBoard.createdAtUtc || parseApiDate(updatedBoardData.createdAtUtc),
-            description: updatedBoardData.description || existingBoard.description,
-            updatedAtUtc: parseApiDate(updatedBoardData.updatedAtUtc || new Date()),
-            members: existingBoard.members,
-            swimlanes: existingBoard.swimlanes,
-          })
-          store.boards = store.boards.map(b => b.id === id ? updatedBoard : b);
+        const board = store.boards.find(b => b.id === id);
+        if (board && updatedBoardData) {
+            board.name = updatedBoardData.name!; // Atualiza propriedade observável
+            board.description = updatedBoardData.description; // Atualiza propriedade observável
+            board.updatedAtUtc = parseApiDate(updatedBoardData.updatedAtUtc); // Atualiza propriedade observável
         }
       } else {
         store.error = result.getError() || 'Erro ao atualizar board';
       }
-    });
+    })
   } catch (error: any) {
     runInAction(() => {
       store.error = 'Erro ao atualizar board';

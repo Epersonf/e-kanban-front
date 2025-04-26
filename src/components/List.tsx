@@ -1,101 +1,86 @@
-import React, { useState } from 'react';
-import Card, { CardType } from './Card';
-import CardDetailsModal from './CardDetailsModal';
+// src/components/List/List.tsx (Esboço da modificação)
 
-export interface ListType {
-  id: number;
-  title: string;
-  cards: CardType[];
-}
+import React, { useEffect, useState } from 'react';
+import { Swimlane } from '../models/general/swimlane.model';
+import { Task } from '../models/general/task.model';
+// import Card from '../Card'; // Não importa mais Card diretamente
 
 interface ListProps {
-  list: ListType;
-  onCardDelete: (cardId: number) => void;
-  onCardDragStart: (card: CardType, fromListId: number) => void;
-  isDragOver: boolean;
-  onCardUpdate?: (cardId: number, updated: CardType) => void;
-  onListTitleChange?: (newTitle: string) => void;
-  onListDelete?: () => void;
+  list: Swimlane;
+  onListDelete: (listId: string) => void;
+  onListTitleChange: (newTitle: string) => void;
+  onCardUpdate: (cardId: string, listId: string, updatedData: { title?: string; description?: string }) => void; // Prop repassada
+  renderCard: (task: Task, draggableProps?: any) => React.ReactNode; // << Nova prop
+  // ... (props de D&D: onCardDragStart, isDragOver) ...
 }
 
-const List: React.FC<ListProps> = ({
+export const List: React.FC<ListProps> = ({
   list,
-  onCardDelete,
-  onCardDragStart,
-  isDragOver,
-  onCardUpdate,
+  onListDelete,
   onListTitleChange,
-  onListDelete
+  renderCard, // <-- Usar a nova prop
+  // ... outras props
 }) => {
-  const [selectedCard, setSelectedCard] = useState<CardType | null>(null);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
-  const [editingTitle, setEditingTitle] = useState(list.title);
+  const [currentTitle, setCurrentTitle] = useState(list.getName());
 
-  const handleCardClick = (card: CardType) => {
-    setSelectedCard(card);
-  };
+  useEffect(() => {
+    setCurrentTitle(list.getName());
+  }, [list]);
 
-  const handleCloseModal = () => setSelectedCard(null);
-
-  const handleSaveCard = (updated: CardType) => {
-    if (onCardUpdate) {
-      onCardUpdate(updated.id, updated);
+  const handleTitleBlur = () => {
+    setIsEditingTitle(false);
+    if (currentTitle.trim() && currentTitle !== list.getName()) {
+      onListTitleChange(currentTitle.trim());
+    } else {
+        setCurrentTitle(list.getName()); // Reverte se vazio ou igual
     }
-    setSelectedCard(null);
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-  };
-
-  const handleSaveTitle = () => {
-    if (onListTitleChange && editingTitle.trim() !== list.title) {
-      onListTitleChange(editingTitle.trim())
+  const handleTitleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleTitleBlur();
+    } else if (e.key === 'Escape') {
+      setCurrentTitle(list.getName());
+      setIsEditingTitle(false);
     }
-    setIsEditingTitle(false)
-  }
+  };
 
 
   return (
-    <div
-      style={{
-        background: isDragOver ? '#cbe0f6' : '#162447',
-        color: '#e0e0e0',
-        borderRadius: 6,
-        padding: '12px 16px',
-        display: 'flex',
-        flexDirection: 'column',
-        minHeight: 100,
-        transition: 'background 0.2s',
-      }}
-      onDragOver={handleDragOver}
-    >
-      <div style={{ fontWeight: 'bold', marginBottom: 12, color: '#fff' }}>{list.title}</div>
-      {list.cards.map(card => (
-        <Card
-          key={card.id}
-          card={card}
-          onDelete={() => onCardDelete(card.id)}
-          onClick={() => handleCardClick(card)}
-          draggableProps={{
-            draggable: true,
-            onDragStart: (e: React.DragEvent) => {
-              e.dataTransfer.setData('application/json', JSON.stringify({ card, fromListId: list.id }));
-              onCardDragStart(card, list.id);
-            },
-          }}
-        />
-      ))}
-      {selectedCard && (
-        <CardDetailsModal
-          card={selectedCard}
-          isOpen={!!selectedCard}
-          onClose={handleCloseModal}
-          onSave={handleSaveCard}
-        />
-      )}
+    <div /* Estilo do container da Lista */>
+      <div /* Cabeçalho da Lista (Título e botão delete) */ style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px' }}>
+        {isEditingTitle ? (
+          <input
+            type="text"
+            value={currentTitle}
+            onChange={(e) => setCurrentTitle(e.target.value)}
+            onBlur={handleTitleBlur}
+            onKeyDown={handleTitleKeyDown}
+            autoFocus
+            style={{ /* Estilo do input de título */ }}
+          />
+        ) : (
+          <h3 onClick={() => setIsEditingTitle(true)} style={{ /* Estilo do título */ cursor: 'pointer', margin: 0, flexGrow: 1 }}>
+             {list.getName()}
+          </h3>
+        )}
+        <button onClick={() => onListDelete(list.id!)} style={{ /* Estilo botão delete lista */ }}>
+          ✕
+        </button>
+      </div>
+
+      {/* Container dos Cards (será o Droppable do react-beautiful-dnd) */}
+      <div /* Estilo do container de cards */ style={{ padding: '0 8px', minHeight: '20px' /* para área de drop */ }}>
+        {list.getTasks()
+          .sort(/* Se precisar de ordenação específica de tasks aqui */)
+          .map((task, index) => (
+             // Chama a função renderCard passada por BoardDetail
+             // O segundo argumento seria as props do Draggable (vindo de react-beautiful-dnd)
+             renderCard(task /*, draggableProvided.draggableProps, draggableProvided.dragHandleProps */)
+          ))}
+        {/* Placeholder do Droppable (vindo de react-beautiful-dnd) */}
+      </div>
     </div>
   );
 };
-
-export default List;

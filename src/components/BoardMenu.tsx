@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 
 interface BoardMenuProps {
-  boards: { id: number; title: string }[];
-  selectedBoardId: number | null;
-  onSelect: (id: number) => void;
+  boards: { id: string; title: string }[];
+  selectedBoardId: string | null;
+  onSelect: (id: string) => void;
   onCreate: () => void;
 }
 
