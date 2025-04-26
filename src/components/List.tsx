@@ -1,17 +1,15 @@
-// src/components/List/List.tsx (Esboço da modificação)
-
 import React, { useEffect, useState } from 'react';
-import { Swimlane } from '../models/general/swimlane.model';
-import { Task } from '../models/general/task.model';
-// import Card from '../Card'; // Não importa mais Card diretamente
+import { Droppable, DroppableProvided, DroppableStateSnapshot } from 'react-beautiful-dnd';
+import { Swimlane } from '../../models/general/swimlane.model'; // Ajuste no path relativo
+import { Task } from '../../models/general/task.model'; // Ajuste no path relativo
 
 interface ListProps {
   list: Swimlane;
   onListDelete: (listId: string) => void;
   onListTitleChange: (newTitle: string) => void;
-  onCardUpdate: (cardId: string, listId: string, updatedData: { title?: string; description?: string }) => void; // Prop repassada
-  renderCard: (task: Task, draggableProps?: any) => React.ReactNode; // << Nova prop
-  // ... (props de D&D: onCardDragStart, isDragOver) ...
+  // onCardUpdate não é mais necessária aqui se for gerenciada centralmente
+  renderCard: (task: Task, index: number) => React.ReactNode; // << Atualizado para receber index
+  // ... (outras props, se houver) ...
 }
 
 export const List: React.FC<ListProps> = ({
@@ -70,17 +68,30 @@ export const List: React.FC<ListProps> = ({
         </button>
       </div>
 
-      {/* Container dos Cards (será o Droppable do react-beautiful-dnd) */}
-      <div /* Estilo do container de cards */ style={{ padding: '0 8px', minHeight: '20px' /* para área de drop */ }}>
-        {list.getTasks()
-          .sort(/* Se precisar de ordenação específica de tasks aqui */)
-          .map((task, index) => (
-             // Chama a função renderCard passada por BoardDetail
-             // O segundo argumento seria as props do Draggable (vindo de react-beautiful-dnd)
-             renderCard(task /*, draggableProvided.draggableProps, draggableProvided.dragHandleProps */)
-          ))}
-        {/* Placeholder do Droppable (vindo de react-beautiful-dnd) */}
-      </div>
+      {/* Container dos Cards - Agora é um Droppable */}
+      <Droppable droppableId={list.id!} type="CARD">
+        {(provided: DroppableProvided, snapshot: DroppableStateSnapshot) => (
+          <div
+            ref={provided.innerRef}
+            {...provided.droppableProps}
+            style={{
+              padding: '0 8px',
+              minHeight: '50px', // Aumentar um pouco para melhor área de drop
+              background: snapshot.isDraggingOver ? '#e0f2f7' : 'transparent', // Feedback visual
+              transition: 'background-color 0.2s ease',
+              borderRadius: '4px',
+            }}
+          >
+            {list.getTasks()
+              // .sort(/* Se precisar de ordenação específica de tasks aqui */) // Ordenação deve vir da store ou API
+              .map((task, index) => (
+                 // Chama a função renderCard passada por BoardDetail, agora com index
+                 renderCard(task, index) // Passa o index necessário para o Draggable Card
+              ))}
+            {provided.placeholder} {/* Placeholder é essencial */}
+          </div>
+        )}
+      </Droppable>
     </div>
   );
 };
