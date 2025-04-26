@@ -2,6 +2,7 @@ import { EntityMutable } from "../core/entity-mutable.mode";
 import { Task } from "./task.model";
 
 export class Swimlane extends EntityMutable {
+  
   boardId: string;
   name: string;
   order: number;
@@ -38,5 +39,8 @@ export class Swimlane extends EntityMutable {
 
   public getTasks(): Task[] {
     return this.tasks;
+  }
+  setTasks(sourceTasks: Task[]) {
+    this.tasks = sourceTasks;
   }
 }

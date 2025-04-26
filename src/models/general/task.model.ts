@@ -1,6 +1,7 @@
 import { EntityMutable } from "../core/entity-mutable.mode";
 
 export class Task extends EntityMutable {
+  
   swimlaneId: string;
   name: string;
   description?: string;
@@ -37,4 +38,8 @@ export class Task extends EntityMutable {
   public getOwnerIds(): string[] | undefined {
     return this.ownerIds;
   }
+
+  setSwimlaneId(droppableId: string) {
+    this.swimlaneId = droppableId;
+  } 
 }

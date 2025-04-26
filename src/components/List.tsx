@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Droppable, DroppableProvided, DroppableStateSnapshot } from 'react-beautiful-dnd';
-import { Swimlane } from '../../models/general/swimlane.model'; // Ajuste no path relativo
-import { Task } from '../../models/general/task.model'; // Ajuste no path relativo
+import { Swimlane } from '../models/general/swimlane.model'; // Ajuste no path relativo
+import { Task } from '../models/general/task.model'; // Ajuste no path relativo
 
 interface ListProps {
   list: Swimlane;
