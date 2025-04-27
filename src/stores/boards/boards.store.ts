@@ -1,15 +1,12 @@
 import { makeAutoObservable, runInAction } from 'mobx';
-import { Board } from '../models/general/board.model';
-import { Swimlane } from '../models/general/swimlane.model';
-import { Task } from '../models/general/task.model';
-import { BoardsApi } from '../infra/api/boards.api';
-import { parseApiDate } from '../utils/parse-api-date.utils';
-import { User } from '../models/general/user.model';
-import * as createBoardOps from './create.boards';
-import * as updateBoardOps from './update.boards';
-import * as createSwimlaneOps from './create.swimlanes';
-import * as updateSwimlaneOps from './update.swimlanes';
-import { TasksApi } from '../infra/api/tasks.api';
+import { Board } from '../../models/general/board.model';
+import { BoardsApi } from '../../infra/api/boards.api';
+import { parseApiDate } from '../../utils/parse-api-date.utils';
+import { Task } from '../../models/general/task.model';
+import { Swimlane } from '../../models/general/swimlane.model';
+import { User } from '../../models/general/user.model';
+import { TasksApi } from '../../infra/api/tasks.api';
+
 
 export class BoardsStore {
   boards: Board[] = [];
@@ -127,10 +124,10 @@ export class BoardsStore {
       // Remover da origem
       // Certifique-se que a task existe antes de tentar remover
       if (sourceSwimlane.tasks.length <= sourceIndex || sourceSwimlane.tasks[sourceIndex].id !== taskId) {
-         console.error(`Task ${taskId} not found at source index ${sourceIndex} in swimlane ${sourceSwimlaneId}`);
-         this.error = "Erro interno ao mover task: Task não encontrada na posição esperada.";
-         movedTask = undefined; // Marca que a operação falhou
-         return; // Sai do runInAction
+        console.error(`Task ${taskId} not found at source index ${sourceIndex} in swimlane ${sourceSwimlaneId}`);
+        this.error = "Erro interno ao mover task: Task não encontrada na posição esperada.";
+        movedTask = undefined; // Marca que a operação falhou
+        return; // Sai do runInAction
       }
       movedTask = sourceSwimlane.tasks.splice(sourceIndex, 1)[0];
 
@@ -198,42 +195,42 @@ export class BoardsStore {
     }
   }
 
-  // --- Create Operations ---
-  createBoard(name: string, description?: string): Promise<void> {
-    return createBoardOps.createBoard(this, name, description);
-  }
+//   // --- Create Operations ---
+//   createBoard(name: string, description?: string): Promise<void> {
+//     return createBoardOps.createBoard(this, name, description);
+//   }
 
-  createSwimlane(boardId: string, name: string, order: number): Promise<void> {
-    return createSwimlaneOps.createSwimlane(this, boardId, name, order);
-  }
+//   createSwimlane(boardId: string, name: string, order: number): Promise<void> {
+//     return createSwimlaneOps.createSwimlane(this, boardId, name, order);
+//   }
 
-  createTask(swimlaneId: string, name: string, description?: string): Promise<void> {
-    // Assuming createTask remains in create.boards.ts for now
-    return createBoardOps.createTask(this, swimlaneId, name, description);
-  }
+//   createTask(swimlaneId: string, name: string, description?: string): Promise<void> {
+//     // Assuming createTask remains in create.boards.ts for now
+//     return createBoardOps.createTask(this, swimlaneId, name, description);
+//   }
 
-  // --- Update/Delete Operations ---
-  updateBoardName(id: string, name: string, description?: string): Promise<void> {
-    return updateBoardOps.updateBoardName(this, id, name, description);
-  }
+//   // --- Update/Delete Operations ---
+//   updateBoardName(id: string, name: string, description?: string): Promise<void> {
+//     return updateBoardOps.updateBoardName(this, id, name, description);
+//   }
 
-  deleteBoard(ids: string[]): Promise<void> {
-    return updateBoardOps.deleteBoard(this, ids);
-  }
+//   deleteBoard(ids: string[]): Promise<void> {
+//     return updateBoardOps.deleteBoard(this, ids);
+//   }
 
-  updateSwimlaneName(id: string, name: string, boardId: string, order: number): Promise<void> {
-    return updateSwimlaneOps.updateSwimlaneName(this, id, name, boardId, order);
-  }
+//   updateSwimlaneName(id: string, name: string, boardId: string, order: number): Promise<void> {
+//     return updateSwimlaneOps.updateSwimlaneName(this, id, name, boardId, order);
+//   }
 
-  deleteSwimlane(id: string): Promise<void> {
-    return updateSwimlaneOps.deleteSwimlane(this, id);
-  }
+//   deleteSwimlane(id: string): Promise<void> {
+//     return updateSwimlaneOps.deleteSwimlane(this, id);
+//   }
 
-  deleteTask(taskId: string, swimlaneId: string): Promise<void> {
-    // Assuming deleteTask remains in update.boards.ts for now
-    return updateBoardOps.deleteTask(this, taskId, swimlaneId);
-  }
+//   deleteTask(taskId: string, swimlaneId: string): Promise<void> {
+//     // Assuming deleteTask remains in update.boards.ts for now
+//     return updateBoardOps.deleteTask(this, taskId, swimlaneId);
+//   }
 }
 
 const boardsStore = new BoardsStore();
-export default boardsStore;
+export const useBoardsStore = () => boardsStore;

@@ -8,8 +8,7 @@ import Header from "../../components/Header";
 import ProfileMenu from "../../components/common/ProfileMenu";
 
 // Stores
-import boardsStore from "../../stores/boards.store";
-import singleBoardStore from "../../stores/single-board.store";
+
 
 // Estilos
 import {
@@ -19,11 +18,19 @@ import {
   StatusMessage,
 } from './styles'; // Apenas estilos do layout da página
 import { BoardDetail } from "../../components/BorderDetail/BorderDetail";
+import { useBoardsStore } from "../../stores/boards/boards.store";
+import { useCreateBoardsStore } from "../../stores/boards/create.boards";
+import { useUpdateBoardsStore } from "../../stores/boards/update.boards";
+import { useSingleBoardStore } from "../../stores/boards/single-board.store";
+import { useCreateSwimlaneStore } from "../../stores/swinlane/create.swimlanes";
+import { useUpdateSwimlanesStore } from "../../stores/swinlane/update.swimlanes";
+const boardsStore = useBoardsStore();
+const createBoard = useCreateBoardsStore();
+const updateBoard = useUpdateBoardsStore();
+const singleBoardStore = useSingleBoardStore();
+const createSwimlane = useCreateSwimlaneStore();
+const updateSwimlane = useUpdateSwimlanesStore();
 
-// Tipos (se necessário, mas modelos são importados nas stores/componentes)
-// import { Task } from "../../models/general/task.model";
-// import { Swimlane } from "../../models/general/swimlane.model";
-// import { Board } from "../../models/general/board.model";
 
 export const BoardsPage: React.FC = observer(() => {
   const navigate = useNavigate();
@@ -42,7 +49,7 @@ export const BoardsPage: React.FC = observer(() => {
     const name = prompt('Nome do novo board:') || '';
     if (!name.trim()) return;
     const description = prompt('Descrição do novo board (opcional):') || '';
-    boardsStore.createBoard(name.trim(), description.trim());
+    createBoard.createBoard(name.trim(), description.trim());
     // Opcional: selecionar o novo board após criação?
   };
 
@@ -60,40 +67,40 @@ export const BoardsPage: React.FC = observer(() => {
 
   // Handlers para passar como props para BoardDetail
   const handleUpdateBoardTitle = (boardId: string, newTitle: string, description?: string) => {
-    boardsStore.updateBoardName(boardId, newTitle, description);
+    updateBoard.updateBoardName(boardId, newTitle, description);
   };
 
   const handleDeleteBoard = (ids: string[]) => {
     // Confirmação pode ser movida para BoardDetail se preferir
     if (window.confirm('Tem certeza que deseja excluir este board? Isso removerá todas as listas e cartões.')) {
-        // Se o board deletado for o selecionado, limpa a seleção
-        if (ids.includes(selectedBoardId ?? '')) {
-            singleBoardStore.setSelectedBoardId(null);
-            // Talvez navegar para /boards se a URL ainda for específica
-            // navigate('/boards');
-        }
-        boardsStore.deleteBoard(ids);
+      // Se o board deletado for o selecionado, limpa a seleção
+      if (ids.includes(selectedBoardId ?? '')) {
+        singleBoardStore.setSelectedBoardId(null);
+        // Talvez navegar para /boards se a URL ainda for específica
+        // navigate('/boards');
+      }
+      updateBoard.deleteBoard(ids);
     }
   };
 
   const handleAddList = (boardId: string, name: string, order: number) => {
     // A action da store já é async, então retornamos a Promise
-    return boardsStore.createSwimlane(boardId, name, order);
+    return createSwimlane.createSwimlane(boardId, name, order);
   };
 
   const handleUpdateListTitle = (listId: string, newTitle: string, boardId: string, order: number) => {
-    boardsStore.updateSwimlaneName(listId, newTitle, boardId, order);
+    updateSwimlane.updateSwimlaneName(listId, newTitle, boardId, order);
   };
 
   const handleDeleteList = (listId: string) => {
     // Confirmação pode ser movida para BoardDetail
     if (window.confirm('Excluir esta lista e todos os seus cartões?')) {
-      boardsStore.deleteSwimlane(listId);
+      updateSwimlane.deleteSwimlane(listId);
     }
   };
 
   const handleAddCard = (listId: string, data: { title: string; description: string }) => {
-    boardsStore.createTask(listId, data.title, data.description);
+    createBoard.createTask(listId, data.title, data.description);
   };
 
   const handleCardUpdate = (cardId: string, listId: string, updatedData: { title?: string; description?: string }) => {
@@ -105,7 +112,7 @@ export const BoardsPage: React.FC = observer(() => {
   const handleCardDelete = (cardId: string, listId: string) => {
     // Confirmação pode ser movida para dentro do componente Card/List ou BoardDetail
     if (window.confirm('Excluir este cartão?')) {
-      boardsStore.deleteTask(cardId, listId);
+      updateBoard.deleteTask(cardId, listId);
     }
   };
 
@@ -128,7 +135,7 @@ export const BoardsPage: React.FC = observer(() => {
         selectedBoardId={selectedBoardId} // Passa o ID string ou null
         onSelect={handleSelectBoard} // Handler já espera string
         onCreate={handleCreateBoard}
-        // onDelete={(id: string) => handleDeleteBoard([id])} // Passar array de ID
+      // onDelete={(id: string) => handleDeleteBoard([id])} // Passar array de ID
       />
       <MainContent>
         <HeaderContainer>

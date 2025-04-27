@@ -4,11 +4,11 @@ import { observer } from 'mobx-react-lite';
 import { useParams, useNavigate } from 'react-router-dom';
 // Remova a importação de boardsStore se todas as ações forem chamadas via props do BoardDetail
 // import boardsStore from '../stores/boards.store'; // Mantenha se chamar actions diretamente aqui
-import singleBoardStore from '../stores/single-board.store';
+import singleBoardStore from '../stores/boards/single-board.store';
 import { BoardDetail } from '../components/BorderDetail/BorderDetail'
 import { BoardsPageContainer, HeaderContainer, MainContent, StatusMessage } from './BoardsPage/styles';
 import Header from '../components/Header';
-import boardsStore from '../stores/boards.store';
+import boardsStore from '../stores/boards/boards.store';
 // ... outros imports ...
 
 export const SingleBoardPage: React.FC = observer(() => {
