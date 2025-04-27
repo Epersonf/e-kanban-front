@@ -9,7 +9,7 @@ import * as createBoardOps from './create.boards';
 import * as updateBoardOps from './update.boards';
 import * as createSwimlaneOps from './create.swimlanes';
 import * as updateSwimlaneOps from './update.swimlanes';
-import tasksApi from '../infra/api/tasks.api'; // Importar a instância da API de Tasks
+import { TasksApi } from '../infra/api/tasks.api';
 
 export class BoardsStore {
   boards: Board[] = [];
@@ -155,7 +155,7 @@ export class BoardsStore {
     // this.error = null;
     try {
       // Usar a instância importada tasksApi
-      const result = await tasksApi.updateTask({
+      const result = await TasksApi.updateTask({
         id: taskId,
         swimlaneId: destinationSwimlaneId,
         // Opcional: Enviar a nova ordem se a API precisar/suportar

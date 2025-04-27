@@ -1,8 +1,8 @@
-import ApiCaller from './api-caller';
-import { Task } from '../../models/general/task.model'; // Use Task class
+import { Task } from '../../models/general/task.model';
 import { ValueResult } from '../../models/value_result/value_result';
+import KanbanAPiRequest from '../../api';
+import { plainToInstance } from 'class-transformer';
 
-// Define request/response types based on usage in BoardsPage.tsx and Task model
 interface CreateTaskPayload {
   swimlaneId: string; // Swimlane ID is string
   name: string; // Use name instead of title
@@ -10,7 +10,6 @@ interface CreateTaskPayload {
   // Add order or other fields if required by API
 }
 
-// Assuming update might be needed later, define payload
 interface UpdateTaskPayload {
   id: string; // Task ID is string
   name?: string;
@@ -19,33 +18,42 @@ interface UpdateTaskPayload {
   // Add other updatable fields if necessary
 }
 
-class TasksApi extends ApiCaller {
+export class TasksApi {
+  private static readonly axios = KanbanAPiRequest.getAxios();
   // Note: Getting tasks might be part of getting a swimlane/board, or a separate endpoint.
   // Add a getTasks method if needed.
 
-  public async createTask(payload: CreateTaskPayload): Promise<ValueResult<Task | null>> {
-    const requestBody = {
-      tasks: [payload], // Coloca o payload como um item no array de boards
-    };
-    // Assuming the endpoint is '/tasks'
-    // The response likely returns the created task object
-    return this.post<Task>('/tasks/user', requestBody);
+  static async createTask(payload: CreateTaskPayload): Promise<ValueResult<Task | null>> {
+    const requestBody = { tasks: [payload], };
+    try {
+      const res = await this.axios.post<Task>('/tasks/user', requestBody);
+      const value = plainToInstance(Task, res.data);
+      return new ValueResult({ value });
+    } catch (error) {
+      console.error('Error creating task:', error);
+      return new ValueResult({ error: 'Error creating task' });
+    }
   }
 
-  public async updateTask(payload: UpdateTaskPayload): Promise<ValueResult<Task | null>> {
-    // Assuming the endpoint is `/tasks/{id}`
-    // Send only the fields being updated
-    const { id, ...updateData } = payload;
-    return this.put<Task>(`/tasks/user/${id}`, updateData);
+  static async updateTask(payload: UpdateTaskPayload): Promise<ValueResult<Task | null>> {
+    try {
+      const res = await this.axios.put<Task>('/tasks/user', payload);
+      const value = plainToInstance(Task, res.data);
+      return new ValueResult({ value });
+    } catch (error) {
+      console.error('Error updating task:', error);
+      return new ValueResult({ error: 'Error updating task' });
+    }
   }
 
-  public async deleteTask(id: string): Promise<ValueResult<null>> { // Task ID is string
-    // Assuming the endpoint is `/tasks/{id}`
-    // Assuming no content on successful delete
-    return this.delete<null>(`/tasks/user/${id}`);
+  static async deleteTask(id: string): Promise<ValueResult<null>> {
+    try {
+      const res = await this.axios.put(`/tasks/user/${id}`);
+      return new ValueResult({ value: res.data });
+    } catch (error) {
+      console.error('Error deleting task:', error);
+      return new ValueResult({ error: 'Error deleting task' });
+    }
   }
 }
 
-// Export an instance
-const tasksApi = new TasksApi();
-export default tasksApi;

@@ -1,10 +1,8 @@
-import ApiCaller from './api-caller';
-import { Swimlane } from '../../models/general/swimlane.model'; // Use Swimlane class
+import { Swimlane } from '../../models/general/swimlane.model';
 import { ValueResult } from '../../models/value_result/value_result';
 import KanbanAPiRequest from '../../api';
 import { plainToInstance } from 'class-transformer';
 
-// Define request/response types based on usage in BoardsPage.tsx and Swimlane model
 interface CreateSwimlanePayload {
   swimlanes: { boardId: string, name: string; order: number }[];
 }
@@ -13,8 +11,8 @@ interface UpdateSwimlanePayload {
   swimlanes: { boardId: string, name: string; order: number, id: string }[];
 }
 
-export class SwimlanesApi extends ApiCaller {
-  private static axios = KanbanAPiRequest.getAxios();
+export class SwimlanesApi {
+  private static readonly axios = KanbanAPiRequest.getAxios();
 
   static async createSwimlane(payload: CreateSwimlanePayload): Promise<ValueResult<Swimlane[] | null>> {
     try {

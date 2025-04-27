@@ -8,11 +8,11 @@ import { DndProvider } from "react-dnd";
 function App() {
   return (
     <DndProvider backend={HTML5Backend}>
-          <ThemeProvider theme={theme}>
-      <BrowserRouter>
-        <MainRoutes />
-      </BrowserRouter>
-    </ThemeProvider>
+      <ThemeProvider theme={theme}>
+        <BrowserRouter>
+          <MainRoutes />
+        </BrowserRouter>
+      </ThemeProvider>
     </DndProvider>
   );
 }

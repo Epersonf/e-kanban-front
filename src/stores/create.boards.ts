@@ -58,43 +58,25 @@ export async function createTask(store: BoardsStore, swimlaneId: string, name: s
         });
 
         runInAction(() => {
-          store.boards = store.boards.map(board => {
-            let boardNeedsUpdate = false;
-            const updatedSwimlanes = board.getSwimlanes().map(swimlane => {
-              if (swimlane.id === swimlaneId) {
-                if (swimlane.id && swimlane.createdAtUtc && newTaskInstance.id && newTaskInstance.createdAtUtc) {
-                  boardNeedsUpdate = true;
-                  const updatedTasks = [...swimlane.getTasks(), newTaskInstance];
-                  return new Swimlane({
-                    id: swimlane.id!,
-                    createdAtUtc: swimlane.createdAtUtc,
-                    updatedAtUtc: new Date(), // Swimlane updated time
-                    boardId: swimlane.boardId!,
-                    name: swimlane.name!,
-                    order: swimlane.order!,
-                    tasks: updatedTasks,
-                  });
-                } else {
-                  console.error('Cannot add task: missing ID/date on swimlane or new task.');
-                  return swimlane;
-                }
-              }
-              return swimlane;
-            });
+          const board = store.boards.find(b =>
+            b.getSwimlanes().some(s => s.id === swimlaneId)
+          );
 
-            if (boardNeedsUpdate && board.id && board.createdAtUtc) {
-              return new Board({
-                id: board.id!,
-                createdAtUtc: board.createdAtUtc!,
-                updatedAtUtc: new Date(), // Board updated time
-                name: board.getName(),
-                description: board.getDescription(),
-                members: board.getMembers(),
-                swimlanes: updatedSwimlanes,
-              });
+          if (board) {
+            const swimlane = board.getSwimlanes().find(s => s.id === swimlaneId);
+            if (swimlane) {
+              swimlane.getTasks().push(newTaskInstance);
+              // Opcional: Atualizar updatedAtUtc do swimlane e board se necessário para reatividade em outros lugares
+              // swimlane.updatedAtUtc = new Date();
+              // board.updatedAtUtc = new Date();
+            } else {
+              console.error(`Swimlane with ID ${swimlaneId} not found in board.`);
+              store.error = 'Erro interno: Swimlane não encontrada para adicionar o cartão.';
             }
-            return board;
-          });
+          } else {
+            console.error(`Board containing swimlane with ID ${swimlaneId} not found.`);
+            store.error = 'Erro interno: Board não encontrado para adicionar o cartão.';
+          }
         });
       }
     } else {

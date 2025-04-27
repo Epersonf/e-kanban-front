@@ -1,4 +1,3 @@
-import ApiCaller from './api-caller';
 import { Board } from '../../models/general/board.model'; // Use Board class
 import { ValueResult } from '../../models/value_result/value_result';
 import KanbanAPiRequest from '../../api';
@@ -7,9 +6,8 @@ import { PaginatedList } from '../../models/pagination/paginated_list';
 import { CreateBoardResponse } from '../../models/boards/boards-response.model';
 
 interface CreateBoardPayload {
-  boards: { name: string; description?: string }[]; // Use name, description optional
+  boards: { name: string; description?: string }[];
 }
-
 
 interface UpdateBoardPayload {
   id: string; // Board ID is string in the model
@@ -20,7 +18,7 @@ interface UpdateBoardPayload {
 
 export class BoardsApi {
 
-  private static axios = KanbanAPiRequest.getAxios();
+  private static readonly axios = KanbanAPiRequest.getAxios();
   static async getBoards(params: {
     ids?: string[];
     page: number;
@@ -62,7 +60,7 @@ export class BoardsApi {
   static async updateBoard(payload: UpdateBoardPayload): Promise<ValueResult<Board | null>> {
     try {
       const requestBody = {
-        boards: [payload], // Coloca o payload como um item no array de boards
+        boards: [payload],
       };
       const res = await this.axios.patch<Board>(`/boards/user`, requestBody);
       const value = plainToInstance(Board, res.data);
