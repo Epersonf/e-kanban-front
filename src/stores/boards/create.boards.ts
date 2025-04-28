@@ -12,7 +12,7 @@ export class CreateBoardsStore {
     makeAutoObservable(this);
   }
 
-  async createBoard(name: string, description?: string): Promise<void> {
+  async createBoard(name: string, description?: string): Promise<Board | null> {
     this.error = null;
     try {
       const result = await BoardsApi.createBoard({ boards: [{ name, description }] });
@@ -40,11 +40,15 @@ export class CreateBoardsStore {
           swimlanes: [],
         })
         this.boards.splice(this.boards.length, 0, newBoard);
+        this.boards.push(newBoard);
+        return newBoard;
       });
+      return null;
     } catch (error: any) {
       runInAction(() => {
         this.error = 'Erro ao criar board';
       });
+      return null;
     }
   }
 
@@ -102,7 +106,6 @@ export class CreateBoardsStore {
       });
     }
   }
-
 }
 
 const createBoardsStore = new CreateBoardsStore();

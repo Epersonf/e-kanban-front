@@ -39,6 +39,18 @@ export class Task extends EntityMutable {
     return this.ownerIds;
   }
 
+  setName(name: string) {
+    this.name = name;
+  }
+
+  setDescription(description: string) {
+    this.description = description;
+  }
+
+  setOwnerIds(ownerIds: string[]) {
+    this.ownerIds = ownerIds;
+  }
+
   setSwimlaneId(droppableId: string) {
     this.swimlaneId = droppableId;
   } 

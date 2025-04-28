@@ -7,7 +7,7 @@ import { LoginResponseModel } from '../models/login/login-response.model';
 import LoggedUserStorage from '../models/storage/logged_user_storage';
 
 class LoginStore {
-  loading: boolean = false;
+  isLoading: boolean = false;
   error: string = '';
   token: string = '';
   email: string = '';
@@ -37,23 +37,36 @@ class LoginStore {
     }
     return true;
   }
+  getIsLoading(): boolean {
+    return this.isLoading;
+  }
+  getError(): string {
+    return this.error;
+  }
 
+  setError(error: string) {
+    this.error = error;
+  }
+
+  setIsLoading(isLoading: boolean) {
+    this.isLoading = isLoading;
+  }
 
   async signup(payload: SignupRequestModel) {
-    this.loading = true;
-    this.error = '';
+    this.setIsLoading(true);
+    this.setError('');
     const response = await UsersApi.signup(payload);
     if (response.isError()) return response;
-    this.loading = false;
-    this.error = response.getError() ?? 'Failed to signup';
+    this.setIsLoading(false);
+    this.setError(response.getError() ?? 'Failed to signup');
     return response;
   }
 
   async login(): Promise<ValueResult<boolean> | null> {
     const isValid = this.validate();
     if (!isValid) return null;
-    this.loading = true;
-    this.error = '';
+    this.setError('');
+    this.setIsLoading(true);
     const response = await UsersApi.login({
       email: this.email,
       password: this.password
@@ -61,9 +74,9 @@ class LoginStore {
     if (response.isError()) return new ValueResult({ error: response.getError() });
     const loggedData = response.getValue()!;
     LoggedUserStorage.setUser(loggedData);
-    this.error = response.getError() ?? 'Failed to login';
-    this.loading = false;
-    return new ValueResult({ value: true});
+    this.setError(response.getError() ?? 'Failed to login');
+    this.setIsLoading(false);
+    return new ValueResult({ value: true });
   }
 
   async logout(): Promise<ValueResult<string> | null> {

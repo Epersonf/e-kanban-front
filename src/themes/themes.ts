@@ -1,113 +1,142 @@
 // src/theme/theme.ts
 import { DefaultTheme } from 'styled-components';
 
+// --- Cores inspiradas no Trello ---
+const trelloPalette = {
+  blue: {
+    main: '#0079bf', // Azul principal Trello
+    dark: '#026aa7',  // Azul escuro (usado em headers, hovers)
+    light: '#e0f2f7', // Azul bem claro (usado em backgrounds de drag-over)
+  },
+  text: {
+    primary: '#172b4d',   // Quase preto / azul ardósia escuro
+    secondary: '#5e6c84', // Cinza azulado médio
+    subtle: '#6b778c',    // Cinza azulado mais claro (placeholders, etc)
+    contrast: '#ffffff',  // Branco
+  },
+  background: {
+    default: '#f4f5f7', // Cinza muito claro (fundo de listas/áreas Trello) - ou #ebecf0
+    paper: '#ffffff',   // Fundo de cards, modais, etc.
+    overlay: 'rgba(9, 30, 66, 0.7)', // Overlay de modal
+  },
+  action: { // Cores para interação (baseadas no azul ardósia escuro)
+    hover: 'rgba(9, 30, 66, 0.04)',
+    selected: 'rgba(9, 30, 66, 0.08)',
+    disabledBackground: 'rgba(9, 30, 66, 0.08)', // Similar ao selected ou um pouco mais claro
+    disabled: 'rgba(9, 30, 66, 0.4)', // Cor do texto/ícone desabilitado
+  },
+  border: {
+    main: '#dfe1e6', // Cinza claro para bordas de input/divisores
+  },
+  error: { // Mantendo o vermelho Material, ajuste se necessário
+    main: '#d32f2f',
+    contrastText: '#ffffff',
+    dark: '#c62828',
+  },
+  // Você pode adicionar outras cores semânticas se precisar (success, warning, etc.)
+  // success: { main: '#61bd4f', contrastText: '#ffffff' },
+  // warning: { main: '#ffab00', contrastText: '#172b4d' },
+};
+
+// --- Definição do Tema Trello Style ---
 const theme: DefaultTheme = {
   palette: {
     primary: {
-      main: '#1976d2', // Azul Material UI
-      contrastText: '#ffffff',
+      main: trelloPalette.blue.main,
+      dark: trelloPalette.blue.dark,
+      contrastText: trelloPalette.text.contrast,
+      // 'light' pode ser adicionado se útil
     },
-    secondary: {
-      main: '#dc004e', // Rosa Material UI (exemplo)
+    secondary: { // Mantido rosa como exemplo, ajuste ou remova se não usar
+      main: '#dc004e',
       contrastText: '#ffffff',
     },
     error: {
-      main: '#d32f2f', // Vermelho Material UI
-      contrastText: '#ffffff',
+      main: trelloPalette.error.main,
+      dark: trelloPalette.error.dark,
+      contrastText: trelloPalette.error.contrastText,
     },
     background: {
-      default: '#f5f5f5', // Fundo cinza claro
-      paper: '#ffffff', // Fundo de "papel" (cards, forms)
+      default: trelloPalette.background.default,
+      paper: trelloPalette.background.paper,
+      // Adicionando overlay para fácil acesso
+      overlay: trelloPalette.background.overlay,
     },
     text: {
-      primary: 'rgba(0, 0, 0, 0.87)', // Texto principal escuro
-      secondary: 'rgba(0, 0, 0, 0.6)', // Texto secundário
-      disabled: 'rgba(0, 0, 0, 0.38)', // Texto desabilitado
+      primary: trelloPalette.text.primary,
+      secondary: trelloPalette.text.secondary,
+      disabled: trelloPalette.action.disabled, // Usando cor de ação desabilitada
+      // Adicionando cores extras de texto
+      subtle: trelloPalette.text.subtle,
+      contrast: trelloPalette.text.contrast, // Branco
     },
-    divider: 'rgba(0, 0, 0, 0.12)', // Cor do divisor
+    // Renomeado 'divider' para 'border' para maior clareza
+    border: {
+       main: trelloPalette.border.main,
+    },
+    action: trelloPalette.action,
+    // Adicionando a cor azul clara para referências
+    blue: {
+        light: trelloPalette.blue.light,
+    }
+    // Adicione outras paletas (success, warning) aqui se definidas acima
   },
   typography: {
-    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-    h1: {
-      fontSize: '2.5rem', // 40px
-      fontWeight: 400,
-      lineHeight: 1.2,
-    },
-    h5: {
-      fontSize: '1.5rem', // 24px
-      fontWeight: 500,
-      lineHeight: 1.33,
-    },
-    body1: {
-      fontSize: '1rem', // 16px
-      fontWeight: 400,
-      lineHeight: 1.5,
-    },
-    body2: {
-      fontSize: '0.875rem', // 14px
-      fontWeight: 400,
-      lineHeight: 1.43,
-    },
+    // Fonte mais próxima do Trello (preferência por fontes do sistema)
+    fontFamily: '"-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
+    // Ajuste tamanhos/pesos se necessário para combinar com Trello
+    h1: { fontSize: '2.5rem', fontWeight: 600, lineHeight: 1.2 }, // Ex: Títulos grandes mais pesados
+    h5: { fontSize: '1.25rem', fontWeight: 600, lineHeight: 1.33 }, // Ex: Títulos de modal/lista (20px)
+    body1: { fontSize: '0.875rem', fontWeight: 400, lineHeight: 1.5 }, // Ex: Texto principal (14px)
+    body2: { fontSize: '0.875rem', fontWeight: 400, lineHeight: 1.43 }, // Texto secundário (14px)
     button: {
       fontSize: '0.875rem', // 14px
-      fontWeight: 500,
-      lineHeight: 1.75,
-      textTransform: 'uppercase', // Botões Material UI são geralmente uppercase
+      fontWeight: 500,      // Peso médio
+      lineHeight: 1.5,     // Ajuste conforme necessário
+      textTransform: 'none', // Trello geralmente não usa uppercase
     },
-    caption: {
-      fontSize: '0.75rem', // 12px
-      fontWeight: 400,
-      lineHeight: 1.66,
-    },
+    caption: { fontSize: '0.75rem', fontWeight: 400, lineHeight: 1.66 }, // 12px
   },
-  spacing: (factor: number) => 8 * factor, // Return number instead of string
+  // Espaçamento pode ser mantido, Trello usa múltiplos de 4 e 8
+  spacing: (factor: number) => 8 * factor,
   shape: {
-    borderRadius: '4px', // Raio de borda padrão
+    // Raio de borda padrão do Trello
+    borderRadius: '3px',
   },
-  shadows: [
+  shadows: [ // Sombras mais sutis, inspiradas no Trello/Atlassian Design System
     'none',
-    '0px 2px 1px -1px rgba(0,0,0,0.2), 0px 1px 1px 0px rgba(0,0,0,0.14), 0px 1px 3px 0px rgba(0,0,0,0.12)', // Elevation 1 (exemplo)
-    '0px 3px 3px -2px rgba(0,0,0,0.2), 0px 3px 4px 0px rgba(0,0,0,0.14), 0px 1px 8px 0px rgba(0,0,0,0.12)', // Elevation 2
-    // ... adicione mais níveis de elevação conforme necessário
+    // Sombra sutil para cards/elementos elevados (equivalente a elevation 1 talvez)
+    '0 1px 1px rgba(9,30,66,.25), 0 0 1px rgba(9,30,66,.31)',
+    // Sombra um pouco mais forte para modais/menus dropdown (equivalente a elevation 2-4)
+    '0 4px 8px -2px rgba(9,30,66,.25), 0 0 0 1px rgba(9,30,66,.08)',
+    // Sombra mais pronunciada (equivalente a elevation 8)
+    '0 8px 16px -4px rgba(9,30,66,.25), 0 0 0 1px rgba(9,30,66,.08)',
+    // Adicione mais se necessário
   ],
-  components: {
-    // Configurações específicas de componentes podem ir aqui
-    MuiInput: {
-      // Apenas como exemplo de estrutura, não aplicável diretamente aqui
-      border: '1px solid rgba(0, 0, 0, 0.23)',
-      hoverBorder: '1px solid rgba(0, 0, 0, 0.87)',
-      focusBorder: `2px solid #1976d2`, // Cor primária
-    },
-    MuiButton: {
-      containedPrimary: {
-        backgroundColor: '#1976d2',
-        color: '#ffffff',
-        '&:hover': {
-          backgroundColor: '#1565c0', // Um pouco mais escuro
-        },
-      },
-      outlinedPrimary: {
-        color: '#1976d2',
-        borderColor: 'rgba(25, 118, 210, 0.5)', // Cor primária com alpha
-        '&:hover': {
-          borderColor: '#1976d2',
-          backgroundColor: 'rgba(25, 118, 210, 0.04)', // Fundo leve ao passar o mouse
-        },
-      },
-    },
-  },
+  // Seção 'components' removida pois era específica de Material UI
 };
 
-// É uma boa prática também definir a interface do tema para type safety
+// --- Atualização da Interface DefaultTheme ---
+// Garanta que a interface reflita EXATAMENTE a estrutura do objeto 'theme' acima
 declare module 'styled-components' {
   export interface DefaultTheme {
     palette: {
-      primary: { main: string; contrastText: string };
-      secondary: { main: string; contrastText: string };
-      error: { main: string; contrastText: string };
-      background: { default: string; paper: string };
-      text: { primary: string; secondary: string; disabled: string };
-      divider: string;
+      primary: { main: string; dark: string; contrastText: string; };
+      secondary: { main: string; contrastText: string; }; // Mantenha se usar
+      error: { main: string; dark: string; contrastText: string; };
+      background: { default: string; paper: string; overlay: string; }; // Adicionado overlay
+      text: { primary: string; secondary: string; disabled: string; subtle: string; contrast: string; }; // Adicionado subtle, contrast
+      border: { main: string; }; // Renomeado de divider
+      action: {
+        hover: string;
+        selected: string;
+        disabledBackground: string;
+        disabled: string;
+      };
+      blue?: { // Adicionando azul claro opcional
+          light?: string;
+      }
+      // Adicione outras paletas (success, warning) aqui se definidas no tema
     };
     typography: {
       fontFamily: string;
@@ -118,13 +147,13 @@ declare module 'styled-components' {
       button: { fontSize: string; fontWeight: number; lineHeight: number; textTransform: string };
       caption: { fontSize: string; fontWeight: number; lineHeight: number };
     };
-    spacing: (factor: number) => number; // Update return type to number
+    spacing: (factor: number) => number;
     shape: {
       borderRadius: string;
     };
     shadows: string[];
-    components?: any; // Adicione tipos mais específicos se necessário
+    // components?: any; // Removido ou comente
   }
 }
 
-export default theme;
+export default theme;

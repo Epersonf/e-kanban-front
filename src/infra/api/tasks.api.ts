@@ -10,7 +10,7 @@ interface CreateTaskPayload {
   // Add order or other fields if required by API
 }
 
-interface UpdateTaskPayload {
+export interface UpdateTaskPayload {
   id: string; // Task ID is string
   name?: string;
   description?: string;
@@ -37,7 +37,8 @@ export class TasksApi {
 
   static async updateTask(payload: UpdateTaskPayload): Promise<ValueResult<Task | null>> {
     try {
-      const res = await this.axios.put<Task>('/tasks/user', payload);
+      const requestBody = { tasks: [payload], };
+      const res = await this.axios.patch<Task>('/tasks/user', requestBody);
       const value = plainToInstance(Task, res.data);
       return new ValueResult({ value });
     } catch (error) {
@@ -48,7 +49,7 @@ export class TasksApi {
 
   static async deleteTask(id: string): Promise<ValueResult<null>> {
     try {
-      const res = await this.axios.put(`/tasks/user/${id}`);
+      const res = await this.axios.delete(`/tasks/user/${id}`);
       return new ValueResult({ value: res.data });
     } catch (error) {
       console.error('Error deleting task:', error);

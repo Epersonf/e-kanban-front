@@ -6,10 +6,12 @@ export const BoardsPageContainer = styled.div`
   background-color: #0a192f;
 `;
 
-export const MainContent = styled.div`
-  flex: 1;
+export const MainContent = styled.main`
   display: flex;
-  flex-direction: column;
+  flex-direction: column; // Organiza Header e ScrollableArea verticalmente
+  flex-grow: 1; // Ocupa o espaço restante horizontalmente
+  height: 100vh; // Ocupa toda a altura
+  overflow: hidden; // IMPEDE que MainContent role
 `;
 
 export const HeaderContainer = styled.div`
@@ -22,19 +24,24 @@ export const HeaderContainer = styled.div`
 `;
 
 export const StatusMessage = styled.div`
-  color: #fff;
-  padding: 48px;
-  font-size: 22px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%; // Ocupa altura da ScrollableBoardArea
+  color: ${props => props.theme.palette.text.secondary};
+  font-size: 1.2rem;
+  padding: ${props => props.theme.spacing(4)}px;
   text-align: center;
 
-  &.error {
-    color: #d32f2f; /* Example error color */
+  &.error { // Se tiver classe error
+    color: ${props => props.theme.palette.error.main};
   }
 `;
 
 export const BoardContent = styled.div`
   padding: 24px;
   overflow-y: auto;
+  height: 100%;
 `;
 
 export const BoardTitleArea = styled.div`
@@ -87,6 +94,7 @@ export const ListsContainer = styled.div`
   gap: 16px;
   overflow-x: auto;
   padding-bottom: 16px;
+  overflow-y: visible;
 `;
 
 export const ListWrapper = styled.div`
@@ -107,4 +115,11 @@ export const AddCardButton = styled.button`
   cursor: pointer;
   font-weight: bold;
   width: 100%;
+`;
+
+export const ScrollableBoardArea = styled.div`
+  flex-grow: 1; // Ocupa todo o espaço vertical restante abaixo do HeaderContainer
+  position: relative; // Contexto de posição se necessário
+  /* O fundo azul do board pode vir do BoardDetail ou ser aplicado aqui */
+  /* background-color: ${props => props.theme.palette.primary.main}; */
 `;

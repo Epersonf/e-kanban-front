@@ -27,7 +27,7 @@ export class SwimlanesApi {
 
   static async updateSwimlane(payload: UpdateSwimlanePayload): Promise<ValueResult<Swimlane[] | null>> {
     try {
-      const res = await this.axios.put('/swimlanes/user', payload);
+      const res = await this.axios.patch('/swimlanes/user', payload);
       const value = plainToInstance(Swimlane, res.data);
       return new ValueResult({ value });
     } catch (error) {
@@ -38,7 +38,7 @@ export class SwimlanesApi {
 
   static async deleteSwimlane(id: string): Promise<ValueResult<void | null>> {
     try {
-      const res = await this.axios.put(`/swimlanes/${id}`);
+      const res = await this.axios.delete(`/swimlanes/user/${id}`);
       return new ValueResult({ value: res.data });
     } catch (error) {
       console.error('Error deleting swimlane:', error);

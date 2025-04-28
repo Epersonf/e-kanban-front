@@ -1,4 +1,3 @@
-// src/pages/Login/styles.ts
 import styled, { css } from 'styled-components';
 // Importe os componentes COMUNS MODIFICADOS
 import CommonInput from '../../components/common/common-input/CommonInput';
@@ -61,7 +60,7 @@ export const StyledInput = styled(CommonInput)`
     line-height: ${({ theme }) => theme.typography.body1.lineHeight};
     color: ${({ theme }) => theme.palette.text.primary};
     background-color: ${({ theme }) => theme.palette.background.paper};
-    border: 1px solid ${({ theme }) => theme.palette.divider};
+    border: 1px solid ${({ theme }) => theme.palette.border.main};
     border-radius: ${({ theme }) => theme.shape.borderRadius};
     transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
     box-sizing: border-box;
@@ -161,9 +160,9 @@ export const StyledButton = styled(CommonButton)<StyledButtonProps>`
 `;
 
 // ADICIONE 'export' AQUI
-export const MessageParagraph = styled.p<{ isError?: boolean }>`
+export const MessageParagraph = styled.p<{ $isError?: boolean }>`
   ${({ theme }) => theme.typography.body2};
-  color: ${({ theme, isError }) => isError ? theme.palette.error.main : theme.palette.text.secondary};
+  color: ${({ theme, $isError: isError }) => isError ? theme.palette.error.main : theme.palette.text.secondary};
   margin-top: ${({ theme }) => `${theme.spacing(2)}px`}; // 16px
   text-align: center;
   min-height: ${({ theme }) => theme.typography.body2.lineHeight}em; // Reserva espaço

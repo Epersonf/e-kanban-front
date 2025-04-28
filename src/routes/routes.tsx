@@ -1,8 +1,8 @@
 import { JSX } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
-import LoginPage from "../pages/LoginPage"; // Updated import path
+import LoginPage from "../pages/LoginPage";
 import { BoardsPage } from "../pages/BoardsPage";
-import { SingleBoardPage } from "../pages/SingleBoardPage";
+import { SingleBoardPage } from "../pages/SingleBoardPage/SingleBoardPage";
 
 function MainRoutes(): JSX.Element {
   return (
@@ -13,8 +13,6 @@ function MainRoutes(): JSX.Element {
       //TODO fazer rotas protegidas abaixo
       <Route path="/boards" element={<BoardsPage />} />
       <Route path="/boards/:boardId" element={<SingleBoardPage />} />
-
-
     </Routes>
   )
 }
