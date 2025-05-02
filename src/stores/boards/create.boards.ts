@@ -67,12 +67,12 @@ export class CreateBoardsStore {
           return;
         }
         const newTaskInstance = new Task({
-          id: newTaskData.id!,
-          createdAtUtc: parseApiDate(newTaskData.createdAtUtc),
-          updatedAtUtc: parseApiDate(newTaskData.updatedAtUtc || newTaskData.createdAtUtc),
-          swimlaneId: newTaskData.swimlaneId,
-          name: newTaskData.name,
-          description: newTaskData.description,
+          id: newTaskData[0].id!,
+          createdAtUtc: parseApiDate(newTaskData[0].createdAtUtc),
+          updatedAtUtc: parseApiDate(newTaskData[0].updatedAtUtc || newTaskData[0].createdAtUtc),
+          swimlaneId: newTaskData[0].swimlaneId,
+          name: newTaskData[0].name,
+          description: newTaskData[0].description,
         });
 
         runInAction(() => {

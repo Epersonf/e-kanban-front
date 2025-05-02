@@ -2,9 +2,9 @@
 import React, { JSX, useCallback } from 'react';
 import { Board } from '../../models/general/board.model';
 import { Task } from '../../models/general/task.model';
-import { ListsContainer, ListWrapper, AddCardButton } from '../BoardDetail/BorderDetail.styles';
-import { List } from '../../components/List/List';
-import AddListButton from '../AddListButton/AddListButton';
+import { ListsContainer, ListWrapper, AddCardButton } from '../../components/BoardDetail/BorderDetail.styles';
+import { List } from '../List/List';
+import AddListButton from '../../components/AddListButton/AddListButton';
 
 interface ListsContainerProps {
   board: Board;

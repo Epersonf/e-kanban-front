@@ -92,7 +92,7 @@ export const ListsContainer = styled.div`
 export const ListWrapper = styled.div`
   min-width: 280px;
   background-color: #162447;
-  padding: 16px;
+  /* padding: 16px; */
   border-radius: 8px;
   flex-shrink: 0;
 `;

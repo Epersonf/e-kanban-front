@@ -17,6 +17,7 @@ export class Task extends EntityMutable {
     ownerIds?: string[]
   }) {
     super(params);
+    if (!params) return;
     this.swimlaneId = params.swimlaneId;
     this.name = params.name;
     this.description = params.description;

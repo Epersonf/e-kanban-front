@@ -38,7 +38,9 @@ export class SwimlanesApi {
 
   static async deleteSwimlane(id: string): Promise<ValueResult<void | null>> {
     try {
-      const res = await this.axios.delete(`/swimlanes/user/${id}`);
+      const res = await this.axios.delete(`/swimlanes/user`, {
+        data: { ids: [id] },
+      });
       return new ValueResult({ value: res.data });
     } catch (error) {
       console.error('Error deleting swimlane:', error);

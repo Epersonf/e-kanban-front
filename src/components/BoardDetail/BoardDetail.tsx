@@ -1,18 +1,19 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
-import { DragDropContext } from 'react-beautiful-dnd';
+// import { DragDropContext } from 'react-beautiful-dnd';
 import { Board } from '../../models/general/board.model';
 import { Task } from '../../models/general/task.model';
 import { User } from '../../models/general/user.model';
 import { useDragAndDrop } from '../../hooks/useDragAndDrop';
 import { BoardContent } from './BorderDetail.styles';
 import { BoardHeader } from '../BoardHeader/BoardHeader';
-import { ListsContainerComponent } from '../ListsContainerComponent/ListsContainerComponent';
+import { ListsContainerComponent } from '../../_components/ListsContainerComponent/ListsContainerComponent';
 import AddCardModal from '../../components/AddCardModal/AddCardModal';
-import CardDetailsModal from '../CardDetailsModal/CardDetailsModal';
-import Card from '../../components/Card/Card';
+import CardDetailsModal from '../../_components/CardDetailsModal/CardDetailsModal';
+import Card from '../../_components/Card/Card';
 import { TasksApi, UpdateTaskPayload } from '../../infra/api/tasks.api';
 import { runInAction } from 'mobx';
+import { ListContainer } from '../ListContainer';
 
 interface BoardDetailProps {
   board: Board;
@@ -61,7 +62,7 @@ export const BoardDetail: React.FC<BoardDetailProps> = observer(
     // Effects
     useEffect(() => {
       setEditingTitle(board.getName());
-    }, [board.getName()]);
+    }, [board]);
 
     // Handlers
     const handleSaveBoardTitle = useCallback(() => {
@@ -79,11 +80,6 @@ export const BoardDetail: React.FC<BoardDetailProps> = observer(
       }
     }, [board, onDeleteBoard]);
 
-    const handleOpenAddCardModal = useCallback((listId: string) => {
-      setTargetListId(listId);
-      setShowAddCardModal(true);
-    }, []);
-
     const handleAddCardSubmit = useCallback(
       (data: { title: string; description: string }) => {
         if (!targetListId) return;
@@ -93,11 +89,6 @@ export const BoardDetail: React.FC<BoardDetailProps> = observer(
       },
       [targetListId, onAddCard]
     );
-
-    const handleOpenCardDetailsModal = useCallback((task: Task) => {
-      setEditingCard(task);
-      setIsCardDetailsModalOpen(true);
-    }, []);
 
     const handleCloseCardDetailsModal = useCallback(() => {
       setIsCardDetailsModalOpen(false);
@@ -133,35 +124,6 @@ export const BoardDetail: React.FC<BoardDetailProps> = observer(
       [board, handleCloseCardDetailsModal]
     );
 
-    const renderCardCallback = useCallback(
-      (task: Task, index: number, provided: any) => {
-        const ownerIds = task.getOwnerIds() || [];
-        const taskOwners = ownerIds
-          .map((id) => membersMap.get(id))
-          .filter((user): user is User => Boolean(user));
-
-        return (
-          <Card
-            key={task.id}
-            card={task}
-            owners={taskOwners}
-            onDelete={() => {
-              if (window.confirm(`Excluir o cartão "${task.getName()}"?`)) {
-                onDeleteCard(task.id!, task.getSwimlaneId());
-              }
-            }}
-            onClick={() => handleOpenCardDetailsModal(task)}
-            draggableProps={provided.draggableProps}
-            dragHandleProps={provided.dragHandleProps}
-            innerRef={provided.innerRef}
-          />
-        );
-      },
-      [membersMap, onDeleteCard, handleOpenCardDetailsModal]
-    );
-
-    const { onDragEnd } = useDragAndDrop(board);
-
     return (
       <BoardContent>
         <BoardHeader
@@ -173,17 +135,18 @@ export const BoardDetail: React.FC<BoardDetailProps> = observer(
           handleSaveBoardTitle={handleSaveBoardTitle}
           handleDeleteBoardClick={handleDeleteBoardClick}
         />
-        <DragDropContext onDragEnd={onDragEnd}>
-          <ListsContainerComponent
-            board={board}
-            onAddList={onAddList}
-            onUpdateListTitle={onUpdateListTitle}
-            onDeleteList={onDeleteList}
-            onDeleteCard={onDeleteCard}
-            handleOpenAddCardModal={handleOpenAddCardModal}
-            renderCardCallback={renderCardCallback}
-          />
-        </DragDropContext>
+        {/* <ListsContainerComponent
+          board={board}
+          onAddList={onAddList}
+          onUpdateListTitle={onUpdateListTitle}
+          onDeleteList={onDeleteList}
+          onDeleteCard={onDeleteCard}
+          handleOpenAddCardModal={handleOpenAddCardModal}
+          renderCardCallback={renderCardCallback}
+        /> */}
+        <ListContainer
+          board={board}
+        />
 
         <AddCardModal
           isOpen={showAddCardModal}

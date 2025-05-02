@@ -1,5 +1,5 @@
 import React, { memo, useEffect, useState } from 'react';
-import { Draggable, Droppable, DroppableProvided, DroppableStateSnapshot } from 'react-beautiful-dnd';
+// import { Draggable, Droppable, DroppableProvided, DroppableStateSnapshot } from 'react-beautiful-dnd';
 import { Swimlane } from '../../models/general/swimlane.model';
 import { Task } from '../../models/general/task.model';
 
@@ -87,13 +87,12 @@ export const List: React.FC<ListProps> = memo(({
         </DeleteListButton>
       </ListHeader>
 
-      {/* Container dos Cards - Droppable */}
-      <Droppable droppableId={list.id!} type="CARD">
+      {/* <Droppable droppableId={list.id!} type="CARD">
         {(provided: DroppableProvided, snapshot: DroppableStateSnapshot) => (
           <CardDropArea
             ref={provided.innerRef}
             {...provided.droppableProps}
-            $isDraggingOver={snapshot.isDraggingOver} // Passa o estado para o styled-component
+            $isDraggingOver={snapshot.isDraggingOver}
           >
             {list.getTasks().map((task, index) => (
               <Draggable key={task.id} draggableId={task.id!} index={index}>
@@ -108,10 +107,10 @@ export const List: React.FC<ListProps> = memo(({
                 )}
               </Draggable>
             ))}
-            {provided.placeholder} {/* Essencial para o Droppable */}
+            {provided.placeholder}
           </CardDropArea>
         )}
-      </Droppable>
+      </Droppable> */}
     </ListWrapper>
   );
 });

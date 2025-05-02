@@ -23,10 +23,10 @@ export class TasksApi {
   // Note: Getting tasks might be part of getting a swimlane/board, or a separate endpoint.
   // Add a getTasks method if needed.
 
-  static async createTask(payload: CreateTaskPayload): Promise<ValueResult<Task | null>> {
+  static async createTask(payload: CreateTaskPayload): Promise<ValueResult<Task[] | null>> {
     const requestBody = { tasks: [payload], };
     try {
-      const res = await this.axios.post<Task>('/tasks/user', requestBody);
+      const res = await this.axios.post<Task[]>('/tasks/user', requestBody);
       const value = plainToInstance(Task, res.data);
       return new ValueResult({ value });
     } catch (error) {
