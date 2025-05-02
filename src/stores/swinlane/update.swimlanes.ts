@@ -137,7 +137,7 @@ export class UpdateSwimlanesStore {
     const _swimlane = this.swimlanes.find(s => s.id === id);
     if (_swimlane) {
       task.originalSwimlaneId = id;
-      TasksApi.updateTask({ id: task.id, swimlaneId: id, order: _swimlane.tasks.length });
+      TasksApi.updateTask({ id: task.id, swimlaneId: id, order: _swimlane.tasks.length + 1 });
       _swimlane.tasks.push(task);
     }
   }
