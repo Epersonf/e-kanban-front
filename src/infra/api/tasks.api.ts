@@ -7,7 +7,7 @@ interface CreateTaskPayload {
   swimlaneId: string; // Swimlane ID is string
   name: string; // Use name instead of title
   description?: string;
-  // Add order or other fields if required by API
+  order: number;
 }
 
 export interface UpdateTaskPayload {
@@ -15,7 +15,7 @@ export interface UpdateTaskPayload {
   name?: string;
   description?: string;
   swimlaneId?: string; // If moving task between swimlanes
-  // Add other updatable fields if necessary
+  order?: number;
 }
 
 export class TasksApi {

@@ -70,9 +70,9 @@ export const SingleBoardPage: React.FC = observer(() => {
 	const handleDeleteList = (listId: string) => {
 		updateSwimlane.deleteSwimlane(listId);
 	};
-	const handleAddCard = (listId: string, data: { title: string; description: string }) => {
-		createBoard.createTask(listId, data.title, data.description);
-	};
+	// const handleAddCard = (listId: string, data: { title: string; description: string }) => {
+	// 	createBoard.createTask(listId, data.title, data.description);
+	// };
 	const handleCardUpdate = (cardId: string, listId: string, updatedData: { title?: string; description?: string }) => {
 		// Chamar a action da store (que precisa ser criada)
 		// boardsStore.updateTask(cardId, listId, updatedData);
@@ -101,12 +101,12 @@ export const SingleBoardPage: React.FC = observer(() => {
 						board={selectedBoard}
 						onUpdateBoardTitle={handleSaveBoardTitle}
 						onDeleteBoard={handleDeleteBoardSinglePage}
-						onAddList={handleAddList}
-						onUpdateListTitle={handleUpdateList}
-						onDeleteList={handleDeleteList}
-						onAddCard={handleAddCard}
-						onUpdateCard={handleCardUpdate}
-						onDeleteCard={handleCardDelete}
+						// onAddList={handleAddList}
+						// onUpdateListTitle={handleUpdateList}
+						// onDeleteList={handleDeleteList}
+						// onAddCard={handleAddCard}
+						// onUpdateCard={handleCardUpdate}
+						// onDeleteCard={handleCardDelete}
 					/>
 				) : !boardId ? (
 					<StatusMessage>ID do Board não fornecido.</StatusMessage>

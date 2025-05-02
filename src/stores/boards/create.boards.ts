@@ -52,10 +52,10 @@ export class CreateBoardsStore {
     }
   }
 
-  async createTask(swimlaneId: string, name: string, description?: string): Promise<void> {
+  async createTask(swimlaneId: string, name: string, order: number, description?: string): Promise<void> {
     this.error = null;
     try {
-      const result = await TasksApi.createTask({ swimlaneId, name, description });
+      const result = await TasksApi.createTask({ swimlaneId, name, description, order });
       runInAction(() => {
         if (result.isError()) {
           this.error = result.getError() || 'Erro ao criar task';

@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-export const Container = styled.div`
+export const Container = styled.div<{ $isInsertingCard?: boolean }>`
   display: flex;
   width: 250px;
   max-height: 430px;
@@ -10,6 +10,22 @@ export const Container = styled.div`
   padding: 9px;
   flex-direction: column;
   gap: 8px;
+  border: 2px solid transparent;
+
+  &:hover {
+    border: 2px solid ${props => props.$isInsertingCard ? "#85B8FF" : "transparent"};
+  }
+`;
+
+export const PlaceholderCard = styled.div<{ $height: number }>`
+  background-color: rgba(0, 0, 0, 0.1); // Cinza claro semi-transparente
+  border: 1px dashed #888;
+  border-radius: 3px;
+  margin-bottom: 8px; // Igual à margem do Card normal
+  height: ${props => props.$height}px; // Altura dinâmica
+  width: 100%; // Ocupa a largura do container
+  box-sizing: border-box;
+  flex-shrink: 0; // Evita que encolha em flex container
 `;
 
 export const Header = styled.div`

@@ -110,9 +110,9 @@ export const BoardsPage: React.FC = observer(() => {
     }
   };
 
-  const handleAddCard = (listId: string, data: { title: string; description: string }) => {
-    createBoard.createTask(listId, data.title, data.description);
-  };
+  // const handleAddCard = (listId: string, data: { title: string; description: string }) => {
+  //   createBoard.createTask(listId, data.title, 0, data.description);
+  // };
 
   const handleCardUpdate = (cardId: string, listId: string, updatedData: { title?: string; description?: string }) => {
     // *** Chamar a action que precisa ser criada na store ***
@@ -167,12 +167,12 @@ export const BoardsPage: React.FC = observer(() => {
               board={selectedBoard}
               onUpdateBoardTitle={handleUpdateBoardTitle}
               onDeleteBoard={handleDeleteBoard}
-              onAddList={handleAddList}
-              onUpdateListTitle={handleUpdateListTitle}
-              onDeleteList={handleDeleteList}
-              onAddCard={handleAddCard}
-              onUpdateCard={handleCardUpdate} // Passa o handler (implementar action na store)
-              onDeleteCard={handleCardDelete}
+              // onAddList={handleAddList}
+              // onUpdateListTitle={handleUpdateListTitle}
+              // onDeleteList={handleDeleteList}
+              // onAddCard={handleAddCard}
+              // onUpdateCard={handleCardUpdate} // Passa o handler (implementar action na store)
+              // onDeleteCard={handleCardDelete}
             />
           ) : (
             // Mensagem quando nenhum board está selecionado

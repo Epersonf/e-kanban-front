@@ -3,11 +3,23 @@ import { Board } from '../../models/general/board.model';
 import { Swimlane } from '../../models/general/swimlane.model';
 import { SwimlanesApi } from '../../infra/api/swimlanes.api';
 import { parseApiDate } from '../../utils/parse-api-date.utils';
-import type { BoardsStore } from '../boards/boards.store';
+import { RefObject } from 'react';
+import { TasksApi } from '../../infra/api/tasks.api';
+
+export interface TaskData {
+  id: string;
+  text: string;
+  ref: RefObject<HTMLDivElement | null>;
+  originalSwimlaneId?: string;
+}
 
 export class UpdateSwimlanesStore {
   error: string | null = null;
   boards: Board[] = [];
+  swimlanes: { tasks: TaskData[], id: string }[] = [];
+  private isInserting: boolean = false;
+  private taskToDrag: TaskData | null = null;
+
   constructor() {
     makeAutoObservable(this);
   }
@@ -103,6 +115,52 @@ export class UpdateSwimlanesStore {
         // store.error = 'Erro ao deletar lista';
       });
     }
+  }
+
+  setSwimlane(swimlane: { tasks: TaskData[], id: string }[]) {
+    const _swimlane = this.swimlanes.find(s => s.id === swimlane[0].id);
+    if (_swimlane) {
+      _swimlane.tasks = swimlane[0].tasks;
+    } else {
+      this.swimlanes.push(...swimlane);
+    }
+  }
+
+  removeSwimlaneTask(id: string, task: TaskData) {
+    const _swimlane = this.swimlanes.find(s => s.id === id);
+    if (_swimlane) {
+      _swimlane.tasks.splice(_swimlane.tasks.findIndex(t => t.id === task.id), 1);
+    }
+  }
+
+  addSwimlaneTask(id: string, task: TaskData) {
+    const _swimlane = this.swimlanes.find(s => s.id === id);
+    if (_swimlane) {
+      task.originalSwimlaneId = id;
+      _swimlane.tasks.push(task);
+      console.log(_swimlane.tasks.length);
+      TasksApi.updateTask({ id: task.id, swimlaneId: id, order: _swimlane.tasks.length });
+    }
+  }
+
+  getSwimlaneTasks(id: string) {
+    return this.swimlanes.find(s => s.id === id)?.tasks || [];
+  }
+
+  setIsInserting(isInserting: boolean) {
+    this.isInserting = isInserting;
+  }
+
+  setTaskToDrag(taskToDrag: TaskData | null) {
+    this.taskToDrag = taskToDrag;
+  }
+
+  getIsInserting() {
+    return this.isInserting;
+  }
+
+  getTaskToDrag() {
+    return this.taskToDrag;
   }
 }
 

@@ -1,16 +1,10 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
-// import { DragDropContext } from 'react-beautiful-dnd';
 import { Board } from '../../models/general/board.model';
 import { Task } from '../../models/general/task.model';
 import { User } from '../../models/general/user.model';
-import { useDragAndDrop } from '../../hooks/useDragAndDrop';
 import { BoardContent } from './BorderDetail.styles';
 import { BoardHeader } from '../BoardHeader/BoardHeader';
-import { ListsContainerComponent } from '../../_components/ListsContainerComponent/ListsContainerComponent';
-import AddCardModal from '../../components/AddCardModal/AddCardModal';
-import CardDetailsModal from '../../_components/CardDetailsModal/CardDetailsModal';
-import Card from '../../_components/Card/Card';
 import { TasksApi, UpdateTaskPayload } from '../../infra/api/tasks.api';
 import { runInAction } from 'mobx';
 import { ListContainer } from '../ListContainer';
@@ -19,16 +13,16 @@ interface BoardDetailProps {
   board: Board;
   onUpdateBoardTitle: (boardId: string, newTitle: string, description?: string) => void;
   onDeleteBoard: (boardIds: string[]) => void;
-  onAddList: (boardId: string, name: string, order: number) => Promise<void>;
-  onUpdateListTitle: (listId: string, newTitle: string, boardId: string, order: number) => void;
-  onDeleteList: (listId: string) => void;
-  onAddCard: (listId: string, data: { title: string; description: string }) => void;
-  onUpdateCard: (
-    cardId: string,
-    listId: string,
-    data: { name?: string; description?: string; ownerIds?: string[] }
-  ) => void;
-  onDeleteCard: (cardId: string, listId: string) => void;
+  // onAddList: (boardId: string, name: string, order: number) => Promise<void>;
+  // onUpdateListTitle: (listId: string, newTitle: string, boardId: string, order: number) => void;
+  // onDeleteList: (listId: string) => void;
+  // onAddCard: (listId: string, data: { title: string; description: string }) => void;
+  // onUpdateCard: (
+  //   cardId: string,
+  //   listId: string,
+  //   data: { name?: string; description?: string; ownerIds?: string[] }
+  // ) => void;
+  // onDeleteCard: (cardId: string, listId: string) => void;
 }
 
 export const BoardDetail: React.FC<BoardDetailProps> = observer(
@@ -36,12 +30,12 @@ export const BoardDetail: React.FC<BoardDetailProps> = observer(
     board,
     onUpdateBoardTitle,
     onDeleteBoard,
-    onAddList,
-    onUpdateListTitle,
-    onDeleteList,
-    onAddCard,
-    onUpdateCard,
-    onDeleteCard,
+    // onAddList,
+    // onUpdateListTitle,
+    // onDeleteList,
+    // onAddCard,
+    // onUpdateCard,
+    // onDeleteCard,
   }) => {
     // State
     const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -80,15 +74,15 @@ export const BoardDetail: React.FC<BoardDetailProps> = observer(
       }
     }, [board, onDeleteBoard]);
 
-    const handleAddCardSubmit = useCallback(
-      (data: { title: string; description: string }) => {
-        if (!targetListId) return;
-        onAddCard(targetListId, data);
-        setShowAddCardModal(false);
-        setTargetListId(null);
-      },
-      [targetListId, onAddCard]
-    );
+    // const handleAddCardSubmit = useCallback(
+    //   (data: { title: string; description: string }) => {
+    //     if (!targetListId) return;
+    //     onAddCard(targetListId, data);
+    //     setShowAddCardModal(false);
+    //     setTargetListId(null);
+    //   },
+    //   [targetListId, onAddCard]
+    // );
 
     const handleCloseCardDetailsModal = useCallback(() => {
       setIsCardDetailsModalOpen(false);
@@ -148,16 +142,16 @@ export const BoardDetail: React.FC<BoardDetailProps> = observer(
           board={board}
         />
 
-        <AddCardModal
+        {/* <AddCardModal
           isOpen={showAddCardModal}
           onClose={() => {
             setShowAddCardModal(false);
             setTargetListId(null);
           }}
           onAdd={handleAddCardSubmit}
-        />
+        /> */}
 
-        {isCardDetailsModalOpen && editingCard && (
+        {/* {isCardDetailsModalOpen && editingCard && (
           <CardDetailsModal
             isOpen={isCardDetailsModalOpen}
             card={editingCard}
@@ -165,7 +159,7 @@ export const BoardDetail: React.FC<BoardDetailProps> = observer(
             onClose={handleCloseCardDetailsModal}
             onSave={handleSaveCardDetails}
           />
-        )}
+        )} */}
       </BoardContent>
     );
   }

@@ -5,7 +5,7 @@ import { Board } from "../../models/general/board.model";
 import { SwimlanesApi } from "../../infra/api/swimlanes.api";
 import { List } from "../List";
 import * as ListStyles from "../List/styles";
-import { observable, runInAction, set } from "mobx";
+import { observable, runInAction } from "mobx";
 import { Swimlane } from "../../models/general/swimlane.model";
 
 interface SwimlaneData {
