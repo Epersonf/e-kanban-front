@@ -21,10 +21,12 @@ interface DraggingState {
 
 interface ListProps {
   swimlane: Swimlane
+  onDelete?: (id: string) => void;
 }
 
 export const List: React.FC<ListProps> = observer(({
   swimlane,
+  onDelete
 }) => {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [isAddingTask, setIsAddingTask] = useState(false);
@@ -78,8 +80,11 @@ export const List: React.FC<ListProps> = observer(({
     setIsAddingTask(false);
   };
 
-  const onDeleteList = (swimlaneId: string) => {
-    SwimlanesApi.deleteSwimlane(swimlaneId);
+  const onDeleteList = async (swimlaneId: string) => {
+    const res = await SwimlanesApi.deleteSwimlane(swimlaneId);
+    if (res.isError()) return;
+
+    onDelete && onDelete(swimlane.id!);
   }
 
   const cleanupDrag = useCallback(() => {

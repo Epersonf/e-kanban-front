@@ -53,7 +53,14 @@ export const ListContainer: React.FC<ListContainerProps> = observer(({
         swimlane: values[0]
       };
 
+      setAddingListTitle('');
       swimlanes.push(newSwimlane);
+    });
+  }
+
+  const onDeleteList = (swimlaneId: string) => {
+    runInAction(() => {
+      swimlanes.splice(swimlanes.findIndex(swimlane => swimlane.id === swimlaneId), 1);
     });
   }
 
@@ -85,7 +92,7 @@ export const ListContainer: React.FC<ListContainerProps> = observer(({
   return (
     <Container>
       {swimlanes.map(data => (
-        <List key={data.id} swimlane={data.swimlane} />
+        <List onDelete={onDeleteList} key={data.id} swimlane={data.swimlane} />
       ))}
       {isAddingList ? (
         <ListStyles.Container>
