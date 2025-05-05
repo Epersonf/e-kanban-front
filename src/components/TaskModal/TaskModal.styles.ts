@@ -15,7 +15,7 @@ export const ModalOverlay = styled.div`
 
 // Modal form
 export const TaskForm = styled(BaseForm)`
-  background: ${props => props.theme.palette.background.paper};
+  background: #1e1e1e; /* Darker background for form */
   border-radius: ${props => props.theme.shape.borderRadius};
   padding: ${props => props.theme.spacing(3)}px;
   box-shadow: ${props => props.theme.shadows[2]};
