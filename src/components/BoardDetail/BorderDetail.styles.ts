@@ -40,6 +40,7 @@ export const BoardContent = styled.div`
 export const BoardTitleArea = styled.div`
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
   margin-bottom: 24px;
 `;

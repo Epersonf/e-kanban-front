@@ -2,7 +2,8 @@
 import React from 'react';
 import { FiEdit } from 'react-icons/fi';
 import { Board } from '../../models/general/board.model';
-import { BoardTitleArea, BoardTitle, TitleInput, EditButton, DeleteButton } from '../BoardDetail/BorderDetail.styles';
+import { BoardTitle, BoardTitleArea, DeleteButton, EditButton, TitleInput } from '../BoardDetail/BorderDetail.styles';
+import { LeftSide, Perfil, RightSide } from './BoardHeader.styles';
 
 interface BoardHeaderProps {
   board: Board;
@@ -24,26 +25,33 @@ export const BoardHeader: React.FC<BoardHeaderProps> = ({
   handleDeleteBoardClick,
 }) => (
   <BoardTitleArea>
-    {isEditingTitle ? (
-      <TitleInput
-        value={editingTitle}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditingTitle(e.target.value)}
-        onBlur={handleSaveBoardTitle}
-        onKeyDown={(e: React.KeyboardEvent) => {
-          if (e.key === 'Enter') handleSaveBoardTitle();
-          if (e.key === 'Escape') {
-            setEditingTitle(board.getName());
-            setIsEditingTitle(false);
-          }
-        }}
-        autoFocus
-      />
-    ) : (
-      <BoardTitle>{board.getName()}</BoardTitle>
-    )}
-    <EditButton onClick={() => setIsEditingTitle(true)}>
-      <FiEdit />
-    </EditButton>
-    <DeleteButton onClick={handleDeleteBoardClick}>Excluir</DeleteButton>
+    <LeftSide>
+      {isEditingTitle ? (
+        <TitleInput
+          value={editingTitle}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditingTitle(e.target.value)}
+          onBlur={handleSaveBoardTitle}
+          onKeyDown={(e: React.KeyboardEvent) => {
+            if (e.key === 'Enter') handleSaveBoardTitle();
+            if (e.key === 'Escape') {
+              setEditingTitle(board.getName());
+              setIsEditingTitle(false);
+            }
+          }}
+          autoFocus
+        />
+      ) : (
+        <BoardTitle>{board.getName()}</BoardTitle>
+      )}
+      <EditButton onClick={() => setIsEditingTitle(true)}>
+        <FiEdit />
+      </EditButton>
+      <DeleteButton onClick={handleDeleteBoardClick}>Excluir</DeleteButton>
+    </LeftSide>
+    <RightSide>
+      <Perfil>RS</Perfil>
+      <Perfil>JG</Perfil>
+      <Perfil>EF</Perfil>
+    </RightSide>
   </BoardTitleArea>
 );
