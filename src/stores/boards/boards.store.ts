@@ -183,8 +183,11 @@ export class BoardsStore {
     taskId: string,
     name: string,
     description: string | undefined,
-    newSwimlaneId: string
+    newSwimlaneId: string,
+    ownerIds: string[] | undefined // Add ownerIds parameter
   ): Promise<void> {
+    this.error = null;
+    // Clear previous error from this store before starting a new operation
     this.error = null;
     let originalTaskData: Task | null = null;
     let originalSwimlaneId: string | null = null;
@@ -224,6 +227,7 @@ export class BoardsStore {
         name: name,
         description: description || '', // Ensure description is not undefined
         swimlaneId: newSwimlaneId,
+        ownerIds: ownerIds, // Include ownerIds in optimistic update
         updatedAtUtc: new Date() // Update timestamp locally
       });
 
@@ -249,6 +253,7 @@ export class BoardsStore {
         name: name,
         description: description, // Pass description directly (allows undefined)
         swimlaneId: newSwimlaneId,
+        ownerIds: ownerIds, // Include ownerIds in API call
         // order: undefined // We don't know the order here, API should handle or place last
       });
 
@@ -281,12 +286,13 @@ export class BoardsStore {
           if (taskToRevert && currentSwimlaneOfTask) {
              // Restore original data
               // Ensure all required fields from originalTaskData are passed explicitly
-              const restoredTask = new Task({
-                ...originalTaskData!,
-                id: originalTaskData!.id!,
-                createdAtUtc: originalTaskData!.createdAtUtc!,
-                updatedAtUtc: originalTaskData!.updatedAtUtc! // Explicitly pass updatedAtUtc
-              });
+               const restoredTask = new Task({
+                 ...originalTaskData!,
+                 id: originalTaskData!.id!,
+                 createdAtUtc: originalTaskData!.createdAtUtc!,
+                 updatedAtUtc: originalTaskData!.updatedAtUtc!, // Explicitly pass updatedAtUtc
+                 ownerIds: originalTaskData!.ownerIds // Restore original ownerIds
+               });
 
              // If it was moved, put it back
              if (originalSwimlaneId !== newSwimlaneId) {
@@ -344,13 +350,14 @@ export class BoardsStore {
          }
 
          if (taskToRevert && currentSwimlaneOfTask) {
-          // Ensure all required fields from originalTaskData are passed explicitly
-          const restoredTask = new Task({
-            ...originalTaskData!,
-            id: originalTaskData!.id!,
-            createdAtUtc: originalTaskData!.createdAtUtc!,
-            updatedAtUtc: originalTaskData!.updatedAtUtc! // Explicitly pass updatedAtUtc
-          });
+           // Ensure all required fields from originalTaskData are passed explicitly
+           const restoredTask = new Task({
+             ...originalTaskData!,
+             id: originalTaskData!.id!,
+             createdAtUtc: originalTaskData!.createdAtUtc!,
+             updatedAtUtc: originalTaskData!.updatedAtUtc!, // Explicitly pass updatedAtUtc
+             ownerIds: originalTaskData!.ownerIds // Restore original ownerIds
+           });
             if (originalSwimlaneId !== newSwimlaneId) {
                 originalSwimlane!.tasks.splice(taskIndexInOriginalSwimlane, 0, restoredTask);
             } else {

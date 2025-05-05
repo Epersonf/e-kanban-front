@@ -155,6 +155,7 @@ export const BoardDetail: React.FC<BoardDetailProps> = observer(
             description: taskToEdit?.getDescription() || '',
             swimlaneId: taskToEdit?.getSwimlaneId() || '',
           }}
+          boardMembers={Array.from(membersMap.values())}
         />
       </BoardContent>
     );

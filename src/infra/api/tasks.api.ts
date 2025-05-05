@@ -17,6 +17,7 @@ export interface UpdateTaskPayload {
   description?: string;
   swimlaneId?: string; // If moving task between swimlanes
   order?: number;
+  ownerIds?: string[]; // Add ownerIds
 }
 
 export class TasksApi {
@@ -58,4 +59,3 @@ export class TasksApi {
     }
   }
 }
-

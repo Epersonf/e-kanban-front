@@ -13,9 +13,9 @@ import {
   ActionButtonsContainer,
   SelectContainer
 } from './TaskModal.styles';
+import { User } from '../../models/general/user.model'; // Import User model
 
-// Import MobX store for editing
-import { useTaskEditStore } from '../../stores/tasks/task-edit.store'; // Import the new edit store
+import { useTaskEditStore } from '../../stores/tasks/task-edit.store';
 import { StatusMessage } from '../../themes/globals';
 
 export interface SwimLaneOption {
@@ -23,16 +23,19 @@ export interface SwimLaneOption {
   name: string;
 }
 
+
+
 export interface TaskModalProps {
   isOpen: boolean;
   onClose: () => void;
   swimlanes: SwimLaneOption[];
-  // defaultSwimlaneId is no longer needed as swimlane comes from taskToEdit
+  boardMembers: User[]; // Add boardMembers prop
   taskToEdit: { // taskToEdit is now required for this edit-only modal
     id: string; // ID must be a string
     name: string;
     description?: string;
     swimlaneId: string;
+    ownerIds?: string[]; // taskToEdit can now have ownerIds
   };
 }
 
@@ -40,6 +43,7 @@ const TaskModal: React.FC<TaskModalProps> = observer(({
   isOpen,
   onClose,
   swimlanes,
+  boardMembers, // Destructure boardMembers
   taskToEdit // Removed defaultSwimlaneId from destructuring
 }) => {
   // Use the new TaskEditStore
@@ -118,11 +122,30 @@ const TaskModal: React.FC<TaskModalProps> = observer(({
           </select>
         </SelectContainer>
 
+        {/* Member Selection */}
+        <div>
+          <label>Membros:</label>
+          <div>
+            {boardMembers.map(member => (
+              <div key={member.id}>
+                <input
+                  type="checkbox"
+                  id={`member-${member.id}`}
+                  checked={taskEditStore.ownerIds.includes(member.id!)} // Check if member is an owner
+                  onChange={() => taskEditStore.toggleOwner(member.id!)} // Toggle owner on change
+                />
+                <label htmlFor={`member-${member.id}`}>{member.name} {member.surname}</label>
+              </div>
+            ))}
+          </div>
+        </div>
+
+
         {/* Display error from the task edit store */}
         {taskEditStore.error && (
-          <StatusMessage style={{ color: 'red', marginBottom: '8px' }}>
+          <div style={{ color: 'red', marginBottom: '8px' }}>
             {taskEditStore.error}
-          </StatusMessage>
+          </div>
         )}
 
         <ActionButtonsContainer>

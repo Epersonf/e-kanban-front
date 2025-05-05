@@ -8,6 +8,7 @@ interface EditableTaskData {
   name: string;
   description?: string;
   swimlaneId: string;
+  ownerIds?: string[]; // Add ownerIds to the interface
 }
 
 export class TaskEditStore {
@@ -15,6 +16,7 @@ export class TaskEditStore {
   name: string = '';
   description: string = '';
   swimlaneId: string = '';
+  ownerIds: string[] = []; // Add ownerIds to the state
   isLoading: boolean = false;
   error: string | null = null;
 
@@ -37,6 +39,7 @@ export class TaskEditStore {
       this.name = taskData.name;
       this.description = taskData.description || '';
       this.swimlaneId = taskData.swimlaneId;
+      this.ownerIds = taskData.ownerIds || []; // Load ownerIds
       this.isLoading = false;
       this.error = null;
     });
@@ -48,6 +51,18 @@ export class TaskEditStore {
       if (field === 'name') this.name = value;
       if (field === 'description') this.description = value;
       if (field === 'swimlaneId') this.swimlaneId = value;
+    });
+  }
+
+  // Action to add or remove an owner ID
+  toggleOwner(ownerId: string) {
+    runInAction(() => {
+      const index = this.ownerIds.indexOf(ownerId);
+      if (index > -1) {
+        this.ownerIds.splice(index, 1); // Remove if already exists
+      } else {
+        this.ownerIds.push(ownerId); // Add if doesn't exist
+      }
     });
   }
 
@@ -80,7 +95,8 @@ export class TaskEditStore {
         this.taskId,
         trimmedName,
         trimmedDescription || undefined, // Pass undefined if empty
-        this.swimlaneId
+        this.swimlaneId,
+        this.ownerIds // Pass ownerIds to the update method
       );
 
       // Check for errors from the boardsStore after the attempt
@@ -112,6 +128,7 @@ export class TaskEditStore {
       this.name = '';
       this.description = '';
       this.swimlaneId = '';
+      this.ownerIds = []; // Reset ownerIds
       this.isLoading = false;
       this.error = null;
       // Also clear error in boardsStore if it was related to this action? Maybe not necessary.
