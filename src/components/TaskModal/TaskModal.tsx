@@ -16,8 +16,9 @@ import {
   SelectContainer
 } from './TaskModal.styles';
 
-// Import MobX store
+// Import MobX stores
 import { useCreateBoardsStore } from '../../stores/boards/create.boards';
+import { useBoardsStore } from '../../stores/boards/boards.store'; // Import main boards store
 
 export interface SwimLaneOption {
   id: string;
@@ -48,8 +49,9 @@ const TaskModal: React.FC<TaskModalProps> = observer(({
   const [description, setDescription] = useState('');
   const [swimlaneId, setSwimlaneId] = useState('');
   const [isEditing, setIsEditing] = useState(false);
-  
+
   const createBoardsStore = useCreateBoardsStore();
+  const boardsStore = useBoardsStore(); // Get instance of BoardsStore
 
   // Reset form or populate with task data when modal opens
   useEffect(() => {
@@ -96,27 +98,21 @@ const TaskModal: React.FC<TaskModalProps> = observer(({
     }
 
     try {
-      // For new tasks, we need to determine the order (assuming last position)
-      if (!isEditing) {
-        // Call the store to create a task
-        await createBoardsStore.createTask(
-          swimlaneId,
+        // Call the store to update the task
+        await boardsStore.updateTaskDetails(
+          taskToEdit?.id!, // Pass the task ID
           trimmedName,
-          999, // high number to put at the end
-          trimmedDescription || ' ',
-          []
+          trimmedDescription || undefined, // Pass description or undefined
+          swimlaneId // Pass the selected swimlane ID
         );
-      } else if (taskToEdit) {
-        // Future implementation for editing tasks
-        // This would call an update method on the store
-        console.log('Task editing not implemented yet');
-        // For now, just close
-      }
       
-      onClose();
+
+      onClose(); // Close modal on success
     } catch (error) {
       console.error('Error creating/updating task:', error);
-      alert('Ocorreu um erro ao salvar a tarefa.');
+      // Display specific error from the store if available
+      const errorToShow = isEditing ? boardsStore.error : createBoardsStore.error;
+      alert(errorToShow || 'Ocorreu um erro ao salvar a tarefa.');
     }
   };
 
@@ -133,7 +129,7 @@ const TaskModal: React.FC<TaskModalProps> = observer(({
     <ModalOverlay onClick={handleOverlayClick}>
       <Form onSubmit={handleSubmit}>
         <ModalTitle>
-          {isEditing ? 'Editar Tarefa' : 'Adicionar Nova Tarefa'}
+          {'Editar Tarefa'}
         </ModalTitle>
 
         <Input
@@ -168,9 +164,10 @@ const TaskModal: React.FC<TaskModalProps> = observer(({
           </select>
         </SelectContainer>
 
-        {createBoardsStore.error && (
+        {/* Display error from the relevant store */}
+        {(createBoardsStore.error || boardsStore.error) && (
           <div style={{ color: 'red', marginBottom: '8px' }}>
-            {createBoardsStore.error}
+            {isEditing ? boardsStore.error : createBoardsStore.error}
           </div>
         )}
 
@@ -188,4 +185,3 @@ const TaskModal: React.FC<TaskModalProps> = observer(({
 });
 
 export default TaskModal;
-
