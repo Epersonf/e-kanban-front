@@ -1,16 +1,11 @@
-import React, { useEffect, useState } from "react"; // Apenas useState para estado local da página (ex: userName)
+import React, { useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { useNavigate } from 'react-router-dom';
 
-// Componentes
 import BoardMenu from "../../components/BoardMenu/BoardMenu";
 import Header from "../../components/Header/Header";
 import ProfileMenu from "../../components/ProfileMenu/ProfileMenu";
 
-// Stores
-
-
-// Estilos
 import {
   BoardsPageContainer,
   MainContent,
@@ -23,8 +18,7 @@ import { useBoardsStore } from "../../stores/boards/boards.store";
 import { useCreateBoardsStore } from "../../stores/boards/create.boards";
 import { useUpdateBoardsStore } from "../../stores/boards/update.boards";
 import { useSingleBoardStore } from "../../stores/boards/single-board.store";
-import { useCreateSwimlaneStore } from "../../stores/swinlane/create.swimlanes";
-import { useUpdateSwimlanesStore } from "../../stores/swinlane/update.swimlanes";
+import { useLoginStore } from "../../stores/login.store";
 
 export const BoardsPage: React.FC = observer(() => {
   const navigate = useNavigate();
@@ -32,22 +26,14 @@ export const BoardsPage: React.FC = observer(() => {
   const createBoard = useCreateBoardsStore();
   const updateBoard = useUpdateBoardsStore();
   const singleBoardStore = useSingleBoardStore();
-  const createSwimlane = useCreateSwimlaneStore();
-  const updateSwimlane = useUpdateSwimlanesStore();
+  const loginStore = useLoginStore();
 
-  // Estado Local da Página (Exemplo: info do usuário, se não vier de store de auth)
-  const [userName, setUserName] = useState('Usuário');
-
-  // --- Obter Dados das Stores ---
   const { boards, loading, error } = boardsStore;
-  const { selectedBoard, selectedBoardId } = singleBoardStore; // Pega o ID também para o BoardMenu
+  const { selectedBoard, selectedBoardId } = singleBoardStore;
 
   useEffect(() => {
-    boardsStore.fetchBoards(); // Substitua por sua ação real da store
+    boardsStore.fetchBoards();
   }, []); 
-
-  // --- Handlers que Chamam Actions da Store ---
-  // Estes permanecem na página pois interagem com as stores e navegação
 
   const handleCreateBoard = async () => {
     const name = prompt('Nome do novo board:') || '';
@@ -58,10 +44,10 @@ export const BoardsPage: React.FC = observer(() => {
       if (!newBoard) return;
       boardsStore.addBoard(newBoard);
       
+      singleBoardStore.setSelectedBoardId(newBoard.id!);
     } catch (error) {
-      
+      console.error('Erro ao criar board:', error);  
     }
-    // Opcional: selecionar o novo board após criação?
   };
 
   const handleSelectBoard = (id: string | null) => {
@@ -76,10 +62,11 @@ export const BoardsPage: React.FC = observer(() => {
     }
   };
 
-  // Handlers para passar como props para BoardDetail
   const handleUpdateBoardTitle = (boardId: string, newTitle: string, description?: string) => {
     updateBoard.updateBoard(boardId, newTitle, description);
   };
+  
+
 
   const handleDeleteBoard = (ids: string[]) => {
     // Confirmação pode ser movida para BoardDetail se preferir
@@ -94,13 +81,11 @@ export const BoardsPage: React.FC = observer(() => {
     }
   };
 
-  // TODO refact this method below
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    window.location.href = '/login'; // Ou usar navigate('/login') se o roteador cobrir
+    loginStore.logout();
+    navigate('/');
   };
 
-  // --- Rendering ---
   return (
     <BoardsPageContainer>
       {/* BoardMenu agora usa IDs string e recebe dados diretamente */}
@@ -115,7 +100,10 @@ export const BoardsPage: React.FC = observer(() => {
       <MainContent>
         <HeaderContainer>
           <Header />
-          <ProfileMenu userName={userName} onLogout={handleLogout} />
+          <ProfileMenu
+            userName={loginStore.fullName}
+            onLogout={handleLogout}
+          />
         </HeaderContainer>
 
         <ScrollableBoardArea>
@@ -132,12 +120,10 @@ export const BoardsPage: React.FC = observer(() => {
               onDeleteBoard={handleDeleteBoard}
             />
           ) : (
-            // Mensagem quando nenhum board está selecionado
             <StatusMessage>
               {boards.length > 0 ? "Selecione um board ao lado para começar." : "Crie seu primeiro board!"}
             </StatusMessage>
           )}
-          {/* AddCardModal foi movido para BoardDetail */}
         </ScrollableBoardArea>
       </MainContent>
     </BoardsPageContainer>

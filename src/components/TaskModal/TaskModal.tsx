@@ -16,6 +16,7 @@ import {
 
 // Import MobX store for editing
 import { useTaskEditStore } from '../../stores/tasks/task-edit.store'; // Import the new edit store
+import { StatusMessage } from '../../themes/globals';
 
 export interface SwimLaneOption {
   id: string;
@@ -119,9 +120,9 @@ const TaskModal: React.FC<TaskModalProps> = observer(({
 
         {/* Display error from the task edit store */}
         {taskEditStore.error && (
-          <div style={{ color: 'red', marginBottom: '8px' }}>
+          <StatusMessage style={{ color: 'red', marginBottom: '8px' }}>
             {taskEditStore.error}
-          </div>
+          </StatusMessage>
         )}
 
         <ActionButtonsContainer>

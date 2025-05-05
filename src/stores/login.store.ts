@@ -1,4 +1,4 @@
-import { makeAutoObservable } from 'mobx';
+import { makeAutoObservable, runInAction } from 'mobx';
 import UsersApi from '../infra/api/users.api';
 import { SignupRequestModel } from '../models/login/signup-request.model';
 import { LoginRequestModel } from '../models/login/login-request.model';
@@ -11,6 +11,7 @@ class LoginStore {
   error: string = '';
   token: string = '';
   email: string = '';
+  fullName: string = '';
   password: string = '';
   usersApi: UsersApi;
 
@@ -63,24 +64,45 @@ class LoginStore {
   }
 
   async login(): Promise<ValueResult<boolean> | null> {
-    const isValid = this.validate();
-    if (!isValid) return null;
-    this.setError('');
-    this.setIsLoading(true);
-    const response = await UsersApi.login({
-      email: this.email,
-      password: this.password
+    if (!this.validate()) return null;
+  
+    runInAction(() => {
+      this.setError('');
+      this.setIsLoading(true);
     });
-    if (response.isError()) return new ValueResult({ error: response.getError() });
-    const loggedData = response.getValue()!;
-    LoggedUserStorage.setUser(loggedData);
-    this.setError(response.getError() ?? 'Failed to login');
-    this.setIsLoading(false);
-    return new ValueResult({ value: true });
+  
+    try {
+      const response = await UsersApi.login({
+        email: this.email,
+        password: this.password
+      });
+  
+      if (response.isError()) {
+        return new ValueResult({ error: response.getError() });
+      }
+  
+      const data = response.getValue()!;
+      const user = data.getUser();
+  
+      runInAction(() => {
+        this.fullName = `${user.name} ${user.surname}`;
+        LoggedUserStorage.setUser(data);
+      });
+  
+      return new ValueResult({ value: true });
+    } finally {
+      runInAction(() => {
+        this.setIsLoading(false);
+      });
+    }
   }
 
-  async logout(): Promise<ValueResult<string> | null> {
+  async logout(): Promise<ValueResult<void>> {
+    this.setIsLoading(true);
     LoggedUserStorage.clear();
+    runInAction(() => {
+      this.setIsLoading(false);
+    })
     return new ValueResult();
   }
 }

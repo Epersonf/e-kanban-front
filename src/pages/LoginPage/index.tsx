@@ -1,5 +1,3 @@
-
-// src/pages/Login/index.tsx
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useLoginStore } from '../../stores/login.store';
@@ -8,11 +6,11 @@ import {
   LoginPageContainer,
   Title,
   FormContainer,
-  InputGroup, // Usando o wrapper
+  InputGroup,
   StyledInput,
   StyledButton,
   MessageParagraph,
-  LoadingSpinner // Importando o spinner
+  LoadingSpinner
 } from './styles';
 
 // Definindo tipos para os campos do formulário para maior clareza
