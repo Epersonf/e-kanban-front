@@ -54,7 +54,7 @@ export const BoardsPage: React.FC = observer(() => {
     if (!name.trim()) return;
     const description = prompt('Descrição do novo board (opcional):') || '';
     try {
-      const newBoard = await createBoard.createBoard(name.trim(), description.trim());
+      const newBoard = await createBoard.createBoard(name.trim(), description.trim() || ' ');
       if (!newBoard) return;
       boardsStore.addBoard(newBoard);
       
