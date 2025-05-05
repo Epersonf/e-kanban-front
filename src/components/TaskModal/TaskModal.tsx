@@ -103,7 +103,8 @@ const TaskModal: React.FC<TaskModalProps> = observer(({
           swimlaneId,
           trimmedName,
           999, // high number to put at the end
-          trimmedDescription || undefined
+          trimmedDescription || ' ',
+          []
         );
       } else if (taskToEdit) {
         // Future implementation for editing tasks

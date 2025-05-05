@@ -8,6 +8,7 @@ interface CreateTaskPayload {
   name: string; // Use name instead of title
   description?: string;
   order: number;
+  ownerIds: string[];
 }
 
 export interface UpdateTaskPayload {

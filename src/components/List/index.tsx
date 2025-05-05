@@ -53,7 +53,8 @@ export const List: React.FC<ListProps> = observer(({
           name: textValue,
           swimlaneId: swimlane.id!,
           description: ' ', // Ou deixe o usuário definir
-          order: updateSwimlaneStore.getSwimlaneTasks(swimlane.id!).length // Adiciona ao final por padrão
+          order: updateSwimlaneStore.getSwimlaneTasks(swimlane.id!).length, // Adiciona ao final por padrão
+          ownerIds: []
         });
 
         if (res.isError()) {
