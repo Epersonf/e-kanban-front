@@ -16,7 +16,7 @@ export class TaskEditStore {
   name: string = '';
   description: string = '';
   swimlaneId: string = '';
-  ownerIds: string[] = []; // Add ownerIds to the state
+  ownerIds: string[] = [];
   isLoading: boolean = false;
   error: string | null = null;
 

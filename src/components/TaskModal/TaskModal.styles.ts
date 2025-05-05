@@ -5,7 +5,7 @@ import BaseForm from '../Form/Form';
 export const ModalOverlay = styled.div`
   position: fixed;
   inset: 0; // Equivalent to top: 0, left: 0, width: 100vw, height: 100vh
-  background: #121212; /* Dark gray */
+  background: ${props => props.theme.palette.background.overlay};
   display: flex;
   justify-content: center;
   align-items: center;

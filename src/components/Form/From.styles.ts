@@ -4,7 +4,7 @@ import styled from 'styled-components'; // Importar styled
 // Criamos um componente estilizado baseado na tag <form>
 export const StyledForm = styled.form`
   /* Aplicando estilos do tema Trello */
-  background: ${props => props.theme.palette.background.paper}; /* Fundo branco */
+  background: ${props => props.theme.palette.primary.dark};
   /* Usando o borderRadius do tema (3px) - o inline era 8px */
   border-radius: ${props => props.theme.shape.borderRadius};
   padding: ${props => props.theme.spacing(3)}px; /* 24px */

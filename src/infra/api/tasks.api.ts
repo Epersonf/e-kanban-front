@@ -39,7 +39,11 @@ export class TasksApi {
 
   static async updateTask(payload: UpdateTaskPayload): Promise<ValueResult<Task | null>> {
     try {
-      const requestBody = { tasks: [payload], };
+      const req: UpdateTaskPayload = {
+        ...payload,
+        ownerIds: payload.ownerIds || [],
+      }
+      const requestBody = { tasks: [req], };
       const res = await this.axios.patch<Task>('/tasks/user', requestBody);
       const value = plainToInstance(Task, res.data);
       return new ValueResult({ value });

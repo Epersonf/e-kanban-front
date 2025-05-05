@@ -1,12 +1,3 @@
-import React, { useEffect } from 'react';
-import { observer } from 'mobx-react-lite';
-
-import Button from '../Button/Button';
-import Input from '../Input/Input';
-import TextArea from '../common/TextArea';
-import Form from '../Form/Form';
-
-// Import styled components
 import {
   ModalOverlay,
   ModalTitle,
@@ -17,6 +8,12 @@ import { User } from '../../models/general/user.model'; // Import User model
 
 import { useTaskEditStore } from '../../stores/tasks/task-edit.store';
 import { StatusMessage } from '../../themes/globals';
+import Button from '../Button/Button';
+import Form from '../Form/Form';
+import { observer } from 'mobx-react';
+import { useEffect } from 'react';
+import Input from '../Input/Input';
+import TextArea from '../common/TextArea';
 
 export interface SwimLaneOption {
   id: string;
@@ -94,14 +91,14 @@ const TaskModal: React.FC<TaskModalProps> = observer(({
           autoFocus
           placeholder="Nome da tarefa"
           value={taskEditStore.name}
-          onChange={e => taskEditStore.updateField('name', e.target.value)} // Update store on change
+          onChange={e => taskEditStore.updateField('name', e.target.value)}
           required
         />
 
         <TextArea
           placeholder="Descrição da tarefa"
-          value={taskEditStore.description} // Bind value to store
-          onChange={e => taskEditStore.updateField('description', e.target.value)} // Update store on change
+          value={taskEditStore.description}
+          onChange={e => taskEditStore.updateField('description', e.target.value)}
           rows={4}
         />
 
@@ -131,8 +128,8 @@ const TaskModal: React.FC<TaskModalProps> = observer(({
                 <input
                   type="checkbox"
                   id={`member-${member.id}`}
-                  checked={taskEditStore.ownerIds.includes(member.id!)} // Check if member is an owner
-                  onChange={() => taskEditStore.toggleOwner(member.id!)} // Toggle owner on change
+                  checked={taskEditStore.ownerIds.includes(member.id!.toString())} // Check if member is an owner
+                  onChange={() => taskEditStore.toggleOwner(member.id!.toString())} // Toggle owner on change
                 />
                 <label htmlFor={`member-${member.id}`}>{member.name} {member.surname}</label>
               </div>
