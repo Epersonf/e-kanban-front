@@ -78,7 +78,7 @@ export const BoardsPage: React.FC = observer(() => {
 
   // Handlers para passar como props para BoardDetail
   const handleUpdateBoardTitle = (boardId: string, newTitle: string, description?: string) => {
-    updateBoard.updateBoardName(boardId, newTitle, description);
+    updateBoard.updateBoard(boardId, newTitle, description);
   };
 
   const handleDeleteBoard = (ids: string[]) => {
@@ -94,48 +94,11 @@ export const BoardsPage: React.FC = observer(() => {
     }
   };
 
-  const handleAddList = (boardId: string, name: string, order: number) => {
-    // A action da store já é async, então retornamos a Promise
-    return createSwimlane.createSwimlane(boardId, name, order);
-  };
-
-  const handleUpdateListTitle = (listId: string, newTitle: string, boardId: string, order: number) => {
-    updateSwimlane.updateSwimlaneName(listId, newTitle, boardId, order);
-  };
-
-  const handleDeleteList = (listId: string) => {
-    // Confirmação pode ser movida para BoardDetail
-    if (window.confirm('Excluir esta lista e todos os seus cartões?')) {
-      updateSwimlane.deleteSwimlane(listId);
-    }
-  };
-
-  // const handleAddCard = (listId: string, data: { title: string; description: string }) => {
-  //   createBoard.createTask(listId, data.title, 0, data.description);
-  // };
-
-  const handleCardUpdate = (cardId: string, listId: string, updatedData: { title?: string; description?: string }) => {
-    // *** Chamar a action que precisa ser criada na store ***
-    // boardsStore.moveTask(cardId, listId, updatedData);
-    console.warn("Ação boardsStore.updateTask não implementada", cardId, listId, updatedData);
-  };
-
-  const handleCardDelete = (cardId: string, listId: string) => {
-    // Confirmação pode ser movida para dentro do componente Card/List ou BoardDetail
-    if (window.confirm('Excluir este cartão?')) {
-      updateBoard.deleteTask(cardId, listId);
-    }
-  };
-
-  // Outros Handlers da Página
+  // TODO refact this method below
   const handleLogout = () => {
     localStorage.removeItem('token');
     window.location.href = '/login'; // Ou usar navigate('/login') se o roteador cobrir
   };
-
-  // --- Funções de Adaptação Removidas ---
-  // adaptBoardsForMenu, adaptSelectedBoardIdForMenu, handleSelectBoardFromMenu
-  // adaptListForListComponent, handleCardDeleteFromList foram removidas
 
   // --- Rendering ---
   return (
@@ -167,12 +130,6 @@ export const BoardsPage: React.FC = observer(() => {
               board={selectedBoard}
               onUpdateBoardTitle={handleUpdateBoardTitle}
               onDeleteBoard={handleDeleteBoard}
-              // onAddList={handleAddList}
-              // onUpdateListTitle={handleUpdateListTitle}
-              // onDeleteList={handleDeleteList}
-              // onAddCard={handleAddCard}
-              // onUpdateCard={handleCardUpdate} // Passa o handler (implementar action na store)
-              // onDeleteCard={handleCardDelete}
             />
           ) : (
             // Mensagem quando nenhum board está selecionado

@@ -149,13 +149,12 @@ export const BoardDetail: React.FC<BoardDetailProps> = observer(
           isOpen={showTaskModal}
           onClose={handleCloseTaskModal}
           swimlanes={swimlaneOptions}
-          defaultSwimlaneId={targetSwimlaneId || undefined}
-          taskToEdit={taskToEdit ? {
-            id: taskToEdit.id!,
-            name: taskToEdit.getName(),
-            description: taskToEdit.getDescription(),
-            swimlaneId: taskToEdit.getSwimlaneId()
-          } : undefined}
+          taskToEdit={{
+            id: taskToEdit?.id || '',
+            name: taskToEdit?.getName() || '',
+            description: taskToEdit?.getDescription() || '',
+            swimlaneId: taskToEdit?.getSwimlaneId() || '',
+          }}
         />
       </BoardContent>
     );
