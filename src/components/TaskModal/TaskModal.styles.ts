@@ -5,11 +5,11 @@ import BaseForm from '../Form/Form';
 export const ModalOverlay = styled.div`
   position: fixed;
   inset: 0; // Equivalent to top: 0, left: 0, width: 100vw, height: 100vh
-  background: ${props => props.theme.palette.background.overlay};
+  background: #121212; /* Dark gray */
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1050; // High z-index for modals
+  z-index: 1050; /* High z-index for modals */
   padding: ${props => props.theme.spacing(2)}px;
 `;
 
@@ -32,7 +32,7 @@ export const ModalTitle = styled.h2`
   margin-bottom: ${props => props.theme.spacing(1)}px;
   font-size: ${props => props.theme.typography.h5.fontSize};
   font-weight: ${props => props.theme.typography.h5.fontWeight};
-  color: ${props => props.theme.palette.text.primary};
+  color: #ffffff; /* Light text for dark mode */
   text-align: center;
 `;
 
@@ -42,6 +42,7 @@ export const ActionButtonsContainer = styled.div`
   justify-content: flex-end;
   gap: ${props => props.theme.spacing(1)}px;
   margin-top: ${props => props.theme.spacing(1)}px;
+  color: #ffffff; /* Light text for dark mode */
 `;
 
 // Select container for swimlanes dropdown
@@ -52,22 +53,21 @@ export const SelectContainer = styled.div`
   
   label {
     font-size: ${props => props.theme.typography.body2.fontSize};
-    color: ${props => props.theme.palette.text.secondary};
+    color: #ffffff; /* Light text for dark mode */
   }
   
   select {
     padding: ${props => props.theme.spacing(1)}px;
     border-radius: ${props => props.theme.shape.borderRadius};
-    border: 1px solid ${props => props.theme.palette.border.main};
-    background-color: ${props => props.theme.palette.background.paper};
+    border: 1px solid #616161; /* Darker border for dark mode */
+    background-color: #1e1e1e; /* Darker background for select */
+    color: #ffffff; /* Light text for select */
     font-size: ${props => props.theme.typography.body1.fontSize};
-    color: ${props => props.theme.palette.text.primary};
     
     &:focus {
       outline: none;
-      border-color: ${props => props.theme.palette.primary.main};
-      box-shadow: 0 0 0 2px ${props => props.theme.palette.primary.main}25;
+      border-color: #007bff; /* Dark blue focus outline */
+      box-shadow: 0 0 0 2px #007bff25;
     }
   }
 `;
-
