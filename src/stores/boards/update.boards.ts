@@ -12,7 +12,7 @@ export class UpdateBoardsStore {
     makeAutoObservable(this);
   }
 
-  async updateBoardName(id: string, name: string, description?: string): Promise<void> {
+  async updateBoard(id: string, name: string, description?: string): Promise<void> {
     // store.error = null;
     try {
       const result = await BoardsApi.updateBoard({ id, name, description });

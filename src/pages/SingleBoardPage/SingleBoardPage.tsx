@@ -58,7 +58,7 @@ export const SingleBoardPage: React.FC = observer(() => {
 	// (Mantenha os handlers que são passados como props para BoardDetail)
 	// Exemplo:
 	const handleSaveBoardTitle = (id: string, name: string, description?: string) => {
-		updateBoard.updateBoardName(id, name, description);
+		updateBoard.updateBoard(id, name, description);
 	};
 	const handleDeleteBoardSinglePage = (ids: string[]) => { /* ... como definido antes ... */ };
 	const handleAddList = (boardId: string, name: string, order: number) => {

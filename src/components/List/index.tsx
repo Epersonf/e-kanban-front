@@ -52,8 +52,8 @@ export const List: React.FC<ListProps> = observer(({
         const res = await TasksApi.createTask({
           name: textValue,
           swimlaneId: swimlane.id!,
-          description: ' ', // Ou deixe o usuário definir
-          order: updateSwimlaneStore.getSwimlaneTasks(swimlane.id!).length + 1, // Adiciona ao final por padrão
+          description: ' ',
+          order: updateSwimlaneStore.getSwimlaneTasks(swimlane.id!).length + 1,
           ownerIds: []
         });
 

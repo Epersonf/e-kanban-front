@@ -1,8 +1,6 @@
-// src/components/TaskModal/TaskModal.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 
-// Import common components
 import Button from '../Button/Button';
 import Input from '../Input/Input';
 import TextArea from '../common/TextArea';
@@ -16,8 +14,8 @@ import {
   SelectContainer
 } from './TaskModal.styles';
 
-// Import MobX store
-import { useCreateBoardsStore } from '../../stores/boards/create.boards';
+// Import MobX store for editing
+import { useTaskEditStore } from '../../stores/tasks/task-edit.store'; // Import the new edit store
 
 export interface SwimLaneOption {
   id: string;
@@ -28,96 +26,47 @@ export interface TaskModalProps {
   isOpen: boolean;
   onClose: () => void;
   swimlanes: SwimLaneOption[];
-  defaultSwimlaneId?: string;
-  taskToEdit?: {
-    id?: string;
+  // defaultSwimlaneId is no longer needed as swimlane comes from taskToEdit
+  taskToEdit: { // taskToEdit is now required for this edit-only modal
+    id: string; // ID must be a string
     name: string;
     description?: string;
     swimlaneId: string;
   };
 }
 
-const TaskModal: React.FC<TaskModalProps> = observer(({ 
-  isOpen, 
-  onClose, 
-  swimlanes, 
-  defaultSwimlaneId, 
-  taskToEdit 
+const TaskModal: React.FC<TaskModalProps> = observer(({
+  isOpen,
+  onClose,
+  swimlanes,
+  taskToEdit // Removed defaultSwimlaneId from destructuring
 }) => {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [swimlaneId, setSwimlaneId] = useState('');
-  const [isEditing, setIsEditing] = useState(false);
-  
-  const createBoardsStore = useCreateBoardsStore();
+  // Use the new TaskEditStore
+  const taskEditStore = useTaskEditStore();
 
-  // Reset form or populate with task data when modal opens
+  // Effect to load task data into the store when modal opens or taskToEdit changes
   useEffect(() => {
-    if (!isOpen) {
-      return;
+    if (isOpen && taskToEdit && taskToEdit.id) { // Ensure taskToEdit and its id exist
+      // Load the task data into the edit store
+      // Type assertion needed if TaskModalProps still allows optional id
+      taskEditStore.loadTask(taskToEdit as { id: string; name: string; description?: string; swimlaneId: string; });
+    } else if (!isOpen) {
+       // Reset the store when the modal closes
+      taskEditStore.reset();
     }
-    
-    if (taskToEdit) {
-      setName(taskToEdit.name);
-      setDescription(taskToEdit.description || '');
-      setSwimlaneId(taskToEdit.swimlaneId);
-      setIsEditing(true);
-    } else {
-      setName('');
-      setDescription('');
-      setSwimlaneId(defaultSwimlaneId || (swimlanes.length > 0 ? swimlanes[0].id : ''));
-      setIsEditing(false);
-    }
-  }, [isOpen, taskToEdit, defaultSwimlaneId, swimlanes]);
+    // Dependency array: run when isOpen changes or the task to edit changes
+  }, [isOpen, taskToEdit, taskEditStore]);
 
-  // Clear form when modal closes
-  useEffect(() => {
-    if (!isOpen) {
-      setName('');
-      setDescription('');
-      setSwimlaneId('');
-      setIsEditing(false);
-    }
-  }, [isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const trimmedName = name.trim();
-    const trimmedDescription = description.trim();
-
-    if (!trimmedName) {
-      alert('O nome da tarefa é obrigatório.');
-      return;
+    // Call the save method from the store
+    const success = await taskEditStore.saveTask();
+    if (success) {
+      onClose(); // Close modal only on successful save
     }
-
-    if (!swimlaneId) {
-      alert('Selecione uma coluna para a tarefa.');
-      return;
-    }
-
-    try {
-      // For new tasks, we need to determine the order (assuming last position)
-      if (!isEditing) {
-        // Call the store to create a task
-        await createBoardsStore.createTask(
-          swimlaneId,
-          trimmedName,
-          999, // high number to put at the end
-          trimmedDescription || ' ',
-          []
-        );
-      } else if (taskToEdit) {
-        // Future implementation for editing tasks
-        // This would call an update method on the store
-        console.log('Task editing not implemented yet');
-        // For now, just close
-      }
-      
-      onClose();
-    } catch (error) {
-      console.error('Error creating/updating task:', error);
-      alert('Ocorreu um erro ao salvar a tarefa.');
-    }
+    // Error handling is now done within the store,
+    // and the error message will be displayed via the store's error state.
   };
 
   // Handler to close the modal when clicking overlay
@@ -133,30 +82,30 @@ const TaskModal: React.FC<TaskModalProps> = observer(({
     <ModalOverlay onClick={handleOverlayClick}>
       <Form onSubmit={handleSubmit}>
         <ModalTitle>
-          {isEditing ? 'Editar Tarefa' : 'Adicionar Nova Tarefa'}
+          {'Editar Tarefa'}
         </ModalTitle>
 
         <Input
           autoFocus
           placeholder="Nome da tarefa"
-          value={name}
-          onChange={e => setName(e.target.value)}
+          value={taskEditStore.name}
+          onChange={e => taskEditStore.updateField('name', e.target.value)} // Update store on change
           required
         />
 
         <TextArea
           placeholder="Descrição da tarefa"
-          value={description}
-          onChange={e => setDescription(e.target.value)}
+          value={taskEditStore.description} // Bind value to store
+          onChange={e => taskEditStore.updateField('description', e.target.value)} // Update store on change
           rows={4}
         />
 
         <SelectContainer>
           <label htmlFor="swimlane-select">Coluna:</label>
-          <select 
+          <select
             id="swimlane-select"
-            value={swimlaneId}
-            onChange={e => setSwimlaneId(e.target.value)}
+            value={taskEditStore.swimlaneId} // Bind value to store
+            onChange={e => taskEditStore.updateField('swimlaneId', e.target.value)} // Update store on change
             required
           >
             <option value="">Selecione uma coluna</option>
@@ -168,18 +117,19 @@ const TaskModal: React.FC<TaskModalProps> = observer(({
           </select>
         </SelectContainer>
 
-        {createBoardsStore.error && (
+        {/* Display error from the task edit store */}
+        {taskEditStore.error && (
           <div style={{ color: 'red', marginBottom: '8px' }}>
-            {createBoardsStore.error}
+            {taskEditStore.error}
           </div>
         )}
 
         <ActionButtonsContainer>
-          <Button type="button" variant="secondary" onClick={onClose}>
+          <Button type="button" variant="secondary" onClick={onClose} disabled={taskEditStore.isLoading}>
             Cancelar
           </Button>
-          <Button type="submit" variant="primary">
-            {isEditing ? 'Salvar' : 'Adicionar Tarefa'}
+          <Button type="submit" variant="primary" disabled={taskEditStore.isLoading}>
+            {taskEditStore.isLoading ? 'Salvando...' : 'Salvar'}
           </Button>
         </ActionButtonsContainer>
       </Form>
@@ -188,4 +138,3 @@ const TaskModal: React.FC<TaskModalProps> = observer(({
 });
 
 export default TaskModal;
-
