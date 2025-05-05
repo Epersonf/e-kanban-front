@@ -1,7 +1,6 @@
 // src/components/layout/BoardMenu.styles.ts
 // (Ajuste o caminho conforme sua estrutura)
 import styled from 'styled-components';
-import { FiChevronLeft, FiChevronRight } from 'react-icons/fi'; // Importar ícones aqui se usados apenas nos estilos
 
 // Cores específicas deste componente (Recomendado: Mover para o tema)
 const sidebarColors = {
@@ -21,7 +20,6 @@ export const SidebarContainer = styled.aside<{ $collapsed: boolean }>`
   /* Usando padding do tema onde possível */
   padding: ${props => props.theme.spacing(3)}px 0; // 24px vertical, 0 horizontal
   border-right: 1px solid ${sidebarColors.border};
-  min-height: 100vh; // Ocupa toda a altura da viewport
   display: flex;
   flex-direction: column;
   gap: ${props => props.theme.spacing(1)}px; // 8px entre itens
