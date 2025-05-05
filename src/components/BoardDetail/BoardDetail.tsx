@@ -8,6 +8,7 @@ import { BoardHeader } from '../BoardHeader/BoardHeader';
 import { TasksApi, UpdateTaskPayload } from '../../infra/api/tasks.api';
 import { runInAction } from 'mobx';
 import { ListContainer } from '../ListContainer';
+import TaskModal, { SwimLaneOption } from '../TaskModal/TaskModal';
 
 interface BoardDetailProps {
   board: Board;
@@ -40,10 +41,9 @@ export const BoardDetail: React.FC<BoardDetailProps> = observer(
     // State
     const [isEditingTitle, setIsEditingTitle] = useState(false);
     const [editingTitle, setEditingTitle] = useState(board.getName());
-    const [showAddCardModal, setShowAddCardModal] = useState(false);
-    const [targetListId, setTargetListId] = useState<string | null>(null);
-    const [editingCard, setEditingCard] = useState<Task | null>(null);
-    const [isCardDetailsModalOpen, setIsCardDetailsModalOpen] = useState(false);
+    const [showTaskModal, setShowTaskModal] = useState(false);
+    const [targetSwimlaneId, setTargetSwimlaneId] = useState<string | null>(null);
+    const [taskToEdit, setTaskToEdit] = useState<Task | null>(null);
 
     // Memoização
     const boardMembers = board.getMembers();
@@ -74,19 +74,21 @@ export const BoardDetail: React.FC<BoardDetailProps> = observer(
       }
     }, [board, onDeleteBoard]);
 
-    // const handleAddCardSubmit = useCallback(
-    //   (data: { title: string; description: string }) => {
-    //     if (!targetListId) return;
-    //     onAddCard(targetListId, data);
-    //     setShowAddCardModal(false);
-    //     setTargetListId(null);
-    //   },
-    //   [targetListId, onAddCard]
-    // );
+    // Handlers for Task Modal
+    const handleOpenTaskModal = useCallback((swimlaneId: string, task?: Task) => {
+      setTargetSwimlaneId(swimlaneId);
+      if (task) {
+        setTaskToEdit(task);
+      } else {
+        setTaskToEdit(null);
+      }
+      setShowTaskModal(true);
+    }, []);
 
-    const handleCloseCardDetailsModal = useCallback(() => {
-      setIsCardDetailsModalOpen(false);
-      setEditingCard(null);
+    const handleCloseTaskModal = useCallback(() => {
+      setShowTaskModal(false);
+      setTargetSwimlaneId(null);
+      setTaskToEdit(null);
     }, []);
 
     const handleSaveCardDetails = useCallback(
@@ -113,10 +115,18 @@ export const BoardDetail: React.FC<BoardDetailProps> = observer(
             if (updates.ownerIds) originalCard.setOwnerIds(updates.ownerIds);
           });
         }
-        handleCloseCardDetailsModal();
+        handleCloseTaskModal();
       },
-      [board, handleCloseCardDetailsModal]
+      [board, handleCloseTaskModal]
     );
+
+    // Convert swimlanes to options for the task modal
+    const swimlaneOptions: SwimLaneOption[] = useMemo(() => {
+      return board.getSwimlanes().map(swimlane => ({
+        id: swimlane.id!,
+        name: swimlane.getName()
+      }));
+    }, [board]);
 
     return (
       <BoardContent>
@@ -129,37 +139,24 @@ export const BoardDetail: React.FC<BoardDetailProps> = observer(
           handleSaveBoardTitle={handleSaveBoardTitle}
           handleDeleteBoardClick={handleDeleteBoardClick}
         />
-        {/* <ListsContainerComponent
-          board={board}
-          onAddList={onAddList}
-          onUpdateListTitle={onUpdateListTitle}
-          onDeleteList={onDeleteList}
-          onDeleteCard={onDeleteCard}
-          handleOpenAddCardModal={handleOpenAddCardModal}
-          renderCardCallback={renderCardCallback}
-        /> */}
         <ListContainer
           board={board}
+          onOpenTaskModal={handleOpenTaskModal}
         />
 
-        {/* <AddCardModal
-          isOpen={showAddCardModal}
-          onClose={() => {
-            setShowAddCardModal(false);
-            setTargetListId(null);
-          }}
-          onAdd={handleAddCardSubmit}
-        /> */}
-
-        {/* {isCardDetailsModalOpen && editingCard && (
-          <CardDetailsModal
-            isOpen={isCardDetailsModalOpen}
-            card={editingCard}
-            boardMembers={boardMembers}
-            onClose={handleCloseCardDetailsModal}
-            onSave={handleSaveCardDetails}
-          />
-        )} */}
+        {/* Task Modal for creating and editing tasks */}
+        <TaskModal
+          isOpen={showTaskModal}
+          onClose={handleCloseTaskModal}
+          swimlanes={swimlaneOptions}
+          defaultSwimlaneId={targetSwimlaneId || undefined}
+          taskToEdit={taskToEdit ? {
+            id: taskToEdit.id!,
+            name: taskToEdit.getName(),
+            description: taskToEdit.getDescription(),
+            swimlaneId: taskToEdit.getSwimlaneId()
+          } : undefined}
+        />
       </BoardContent>
     );
   }

@@ -24,11 +24,13 @@ interface DraggingState {
 interface ListProps {
   swimlane: Swimlane;
   onDelete?: (id: string) => void;
+  onOpenTaskModal?: (swimlaneId: string, task?: any) => void;
 }
 
 export const List: React.FC<ListProps> = observer(({
   swimlane,
-  onDelete
+  onDelete,
+  onOpenTaskModal
 }) => {
   const updateSwimlaneStore = useUpdateSwimlanesStore();
 
@@ -315,7 +317,8 @@ export const List: React.FC<ListProps> = observer(({
             // Aplica estilo de "ghost" se esta for a task sendo arrastada E o drag começou
             $isDragging={updateSwimlaneStore.getTaskToDrag()?.id === task.id && updateSwimlaneStore.getIsInserting()}
             onMouseDown={(e: React.MouseEvent<HTMLDivElement>) => onMouseDownTask(e, task)}
-          // REMOVIDO: onMouseUp={cleanupDrag} - o listener global cuida disso
+            onClick={() => onOpenTaskModal && swimlane.getTasks && 
+              onOpenTaskModal(swimlane.id!, swimlane.getTasks().find(t => t.id === task.id))}
           >
             {task.text}
           </Card>
@@ -343,7 +346,9 @@ export const List: React.FC<ListProps> = observer(({
           <Button style={{ width: '31px', height: '31px', padding: '0px' }} onClick={cancelAddingTask}>✕</Button>
         </div>
       ) : (
-        <Button onClick={startAddingTask}>+ Adicionar Cartão</Button>
+        <Button onClick={onOpenTaskModal ? () => onOpenTaskModal(swimlane.id!) : startAddingTask}>
+          + {onOpenTaskModal ? 'Adicionar Tarefa' : 'Adicionar Cartão'}
+        </Button>
       )}
     </Container>
   );

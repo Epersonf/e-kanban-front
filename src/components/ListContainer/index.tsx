@@ -15,11 +15,13 @@ interface SwimlaneData {
 }
 
 interface ListContainerProps {
-  board: Board
+  board: Board;
+  onOpenTaskModal?: (swimlaneId: string, task?: any) => void;
 }
 
 export const ListContainer: React.FC<ListContainerProps> = observer(({
-  board
+board,
+  onOpenTaskModal
 }) => {
   const [isAddingList, setIsAddingList] = useState(false);
   const [addingListTitle, setAddingListTitle] = useState('');
@@ -92,7 +94,12 @@ export const ListContainer: React.FC<ListContainerProps> = observer(({
   return (
     <Container>
       {swimlanes.map(data => (
-        <List onDelete={onDeleteList} key={data.id} swimlane={data.swimlane} />
+        <List 
+          onDelete={onDeleteList} 
+          key={data.id} 
+          swimlane={data.swimlane}
+          onOpenTaskModal={onOpenTaskModal} 
+        />
       ))}
       {isAddingList ? (
         <ListStyles.Container>
