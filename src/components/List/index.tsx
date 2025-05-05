@@ -53,7 +53,7 @@ export const List: React.FC<ListProps> = observer(({
           name: textValue,
           swimlaneId: swimlane.id!,
           description: ' ', // Ou deixe o usuário definir
-          order: updateSwimlaneStore.getSwimlaneTasks(swimlane.id!).length, // Adiciona ao final por padrão
+          order: updateSwimlaneStore.getSwimlaneTasks(swimlane.id!).length + 1, // Adiciona ao final por padrão
           ownerIds: []
         });
 
@@ -347,9 +347,7 @@ export const List: React.FC<ListProps> = observer(({
           <Button style={{ width: '31px', height: '31px', padding: '0px' }} onClick={cancelAddingTask}>✕</Button>
         </div>
       ) : (
-        <Button onClick={onOpenTaskModal ? () => onOpenTaskModal(swimlane.id!) : startAddingTask}>
-          + {onOpenTaskModal ? 'Adicionar Tarefa' : 'Adicionar Cartão'}
-        </Button>
+        <Button onClick={startAddingTask}>+ Adicionar Cartão</Button>
       )}
     </Container>
   );
