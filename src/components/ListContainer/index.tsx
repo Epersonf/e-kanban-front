@@ -35,7 +35,7 @@ board,
           {
             boardId: board.id || '',
             name: addingListTitle,
-            order: 0
+            order: swimlanes.length + 1
           }
         ]
       });
