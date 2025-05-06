@@ -1,5 +1,6 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { useBoardsStore } from '../boards/boards.store';
+import { TasksApi } from '../../infra/api/tasks.api'; // Import tasksApi
 
 // Interface matching the task data needed for editing
 interface EditableTaskData {
@@ -18,8 +19,6 @@ export class TaskEditStore {
   ownerIds: string[] = [];
   isLoading: boolean = false;
   error: string | null = null;
-
-  private boardsStore = useBoardsStore();
 
   constructor() {
     makeAutoObservable(this);
@@ -88,17 +87,16 @@ export class TaskEditStore {
     });
 
     try {
-      await this.boardsStore.updateTaskDetails(
-        this.taskId,
-        trimmedName,
-        trimmedDescription || undefined, // Pass undefined if empty
-        this.swimlaneId,
-        this.ownerIds // Pass ownerIds to the update method
-      );
+      const result = await TasksApi.updateTask({
+        id: this.taskId, // Pass taskId within the payload
+        name: trimmedName,
+        description: trimmedDescription || undefined,
+        swimlaneId: this.swimlaneId,
+        ownerIds: this.ownerIds,
+      });
 
-      // Check for errors from the boardsStore after the attempt
-      if (this.boardsStore.error) {
-        throw new Error(this.boardsStore.error); // Propagate the error
+      if (result.isError()) { // Use isError() to check for failure
+        throw new Error(result.getError() || 'Unknown error'); // Use getError() and handle null
       }
 
       runInAction(() => {
@@ -111,7 +109,7 @@ export class TaskEditStore {
       console.error('Error saving task:', error);
       runInAction(() => {
         this.isLoading = false;
-        this.error = this.boardsStore.error || error.message || 'Ocorreu um erro ao salvar a tarefa.';
+        this.error = (error as Error).message || 'Ocorreu um erro ao salvar a tarefa.'; // Cast error to Error to access message
       });
       return false;
     }
