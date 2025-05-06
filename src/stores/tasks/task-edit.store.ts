@@ -1,6 +1,5 @@
 import { makeAutoObservable, runInAction } from 'mobx';
-import { Task } from '../../models/general/task.model';
-import { useBoardsStore } from '../boards/boards.store'; // To call the update method
+import { useBoardsStore } from '../boards/boards.store';
 
 // Interface matching the task data needed for editing
 interface EditableTaskData {
@@ -8,7 +7,7 @@ interface EditableTaskData {
   name: string;
   description?: string;
   swimlaneId: string;
-  ownerIds?: string[]; // Add ownerIds to the interface
+  ownerIds?: string[];
 }
 
 export class TaskEditStore {
@@ -20,18 +19,16 @@ export class TaskEditStore {
   isLoading: boolean = false;
   error: string | null = null;
 
-  // Keep a reference to the main boards store
   private boardsStore = useBoardsStore();
 
   constructor() {
-    // Need MobX > 6 for makeAutoObservable second arg options
     makeAutoObservable(this);
   }
 
   // Action to load task data into the store
   loadTask(taskData: EditableTaskData | null | undefined) {
     if (!taskData || !taskData.id) {
-      this.reset(); // Reset if no valid task data
+      this.reset();
       return;
     }
     runInAction(() => {
@@ -39,7 +36,7 @@ export class TaskEditStore {
       this.name = taskData.name;
       this.description = taskData.description || '';
       this.swimlaneId = taskData.swimlaneId;
-      this.ownerIds = taskData.ownerIds || []; // Load ownerIds
+      this.ownerIds = taskData.ownerIds || [];
       this.isLoading = false;
       this.error = null;
     });
@@ -59,9 +56,9 @@ export class TaskEditStore {
     runInAction(() => {
       const index = this.ownerIds.indexOf(ownerId);
       if (index > -1) {
-        this.ownerIds.splice(index, 1); // Remove if already exists
+        this.ownerIds.splice(index, 1);
       } else {
-        this.ownerIds.push(ownerId); // Add if doesn't exist
+        this.ownerIds.push(ownerId);
       }
     });
   }
@@ -107,17 +104,16 @@ export class TaskEditStore {
       runInAction(() => {
         this.isLoading = false;
       });
-      this.reset(); // Reset store on successful save
-      return true; // Indicate success
+      this.reset();
+      return true;
 
     } catch (error: any) {
       console.error('Error saving task:', error);
       runInAction(() => {
         this.isLoading = false;
-        // Use error from boardsStore if available, otherwise use generic message
         this.error = this.boardsStore.error || error.message || 'Ocorreu um erro ao salvar a tarefa.';
       });
-      return false; // Indicate failure
+      return false;
     }
   }
 

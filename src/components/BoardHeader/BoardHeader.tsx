@@ -1,4 +1,3 @@
-// components/BoardHeader.tsx
 import React from 'react';
 import { FiEdit } from 'react-icons/fi';
 import { Board } from '../../models/general/board.model';

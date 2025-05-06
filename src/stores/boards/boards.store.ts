@@ -7,7 +7,6 @@ import { Swimlane } from '../../models/general/swimlane.model';
 import { User } from '../../models/general/user.model';
 import { TasksApi } from '../../infra/api/tasks.api';
 
-
 export class BoardsStore {
   boards: Board[] = [];
   loading: boolean = true;
@@ -63,12 +62,7 @@ export class BoardsStore {
               });
             });
             const members = (boardData?.getMembers() || []).map(memberData => new User({
-              id: memberData.id!,
-              createdAtUtc: parseApiDate(memberData.createdAtUtc),
-              updatedAtUtc: parseApiDate(memberData.updatedAtUtc) || memberData.updatedAtUtc,
-              name: memberData.name!,
-              surname: memberData.surname!,
-              email: memberData.email!,
+              ...memberData
             }));
             return new Board({
               id: boardData?.id!,
@@ -184,10 +178,8 @@ export class BoardsStore {
     name: string,
     description: string | undefined,
     newSwimlaneId: string,
-    ownerIds: string[] | undefined // Add ownerIds parameter
+    ownerIds: string[] | undefined
   ): Promise<void> {
-    this.error = null;
-    // Clear previous error from this store before starting a new operation
     this.error = null;
     let originalTaskData: Task | null = null;
     let originalSwimlaneId: string | null = null;
@@ -216,7 +208,7 @@ export class BoardsStore {
       if (!originalTaskData || !originalSwimlane || !targetSwimlane) {
         this.error = "Erro ao atualizar task: Task ou swimlane não encontrada.";
         console.error("Update Task Error: Task, original swimlane, or target swimlane not found.", { taskId, originalSwimlaneId, newSwimlaneId });
-        return; // Stop execution if essential data is missing
+        return;
       }
 
       // --- Optimistic Update ---
@@ -269,41 +261,41 @@ export class BoardsStore {
           let taskIndexInCurrentSwimlane = -1;
 
           if (originalSwimlaneId !== newSwimlaneId) {
-             taskIndexInCurrentSwimlane = targetSwimlane!.tasks.findIndex(t => t.id === taskId);
-             if(taskIndexInCurrentSwimlane !== -1) {
-                taskToRevert = targetSwimlane!.tasks.splice(taskIndexInCurrentSwimlane, 1)[0];
-                currentSwimlaneOfTask = targetSwimlane!;
-             }
+            taskIndexInCurrentSwimlane = targetSwimlane!.tasks.findIndex(t => t.id === taskId);
+            if (taskIndexInCurrentSwimlane !== -1) {
+              taskToRevert = targetSwimlane!.tasks.splice(taskIndexInCurrentSwimlane, 1)[0];
+              currentSwimlaneOfTask = targetSwimlane!;
+            }
           } else {
-             taskIndexInCurrentSwimlane = originalSwimlane!.tasks.findIndex(t => t.id === taskId);
-             if(taskIndexInCurrentSwimlane !== -1) {
-                 taskToRevert = originalSwimlane!.tasks[taskIndexInCurrentSwimlane]; // Don't remove yet, just get ref
-                 currentSwimlaneOfTask = originalSwimlane!;
-             }
+            taskIndexInCurrentSwimlane = originalSwimlane!.tasks.findIndex(t => t.id === taskId);
+            if (taskIndexInCurrentSwimlane !== -1) {
+              taskToRevert = originalSwimlane!.tasks[taskIndexInCurrentSwimlane]; // Don't remove yet, just get ref
+              currentSwimlaneOfTask = originalSwimlane!;
+            }
           }
 
           // If we found the task we optimistically updated/moved...
           if (taskToRevert && currentSwimlaneOfTask) {
-             // Restore original data
-              // Ensure all required fields from originalTaskData are passed explicitly
-               const restoredTask = new Task({
-                 ...originalTaskData!,
-                 id: originalTaskData!.id!,
-                 createdAtUtc: originalTaskData!.createdAtUtc!,
-                 updatedAtUtc: originalTaskData!.updatedAtUtc!, // Explicitly pass updatedAtUtc
-                 ownerIds: originalTaskData!.ownerIds // Restore original ownerIds
-               });
+            // Restore original data
+            // Ensure all required fields from originalTaskData are passed explicitly
+            const restoredTask = new Task({
+              ...originalTaskData!,
+              id: originalTaskData!.id!,
+              createdAtUtc: originalTaskData!.createdAtUtc!,
+              updatedAtUtc: originalTaskData!.updatedAtUtc!, // Explicitly pass updatedAtUtc
+              ownerIds: originalTaskData!.ownerIds // Restore original ownerIds
+            });
 
-             // If it was moved, put it back
-             if (originalSwimlaneId !== newSwimlaneId) {
-                 originalSwimlane!.tasks.splice(taskIndexInOriginalSwimlane, 0, restoredTask);
-             } else {
-                 // If it wasn't moved, just restore data in place
-                 originalSwimlane!.tasks[taskIndexInCurrentSwimlane] = restoredTask;
-             }
+            // If it was moved, put it back
+            if (originalSwimlaneId !== newSwimlaneId) {
+              originalSwimlane!.tasks.splice(taskIndexInOriginalSwimlane, 0, restoredTask);
+            } else {
+              // If it wasn't moved, just restore data in place
+              originalSwimlane!.tasks[taskIndexInCurrentSwimlane] = restoredTask;
+            }
           } else {
-              console.error("Could not find task to revert optimistic update.");
-              // Attempt to refetch board data might be needed here in complex cases
+            console.error("Could not find task to revert optimistic update.");
+            // Attempt to refetch board data might be needed here in complex cases
           }
         });
       } else {
@@ -330,42 +322,42 @@ export class BoardsStore {
       runInAction(() => {
         this.error = "Erro inesperado ao atualizar task.";
         console.error("Unexpected error, reverting optimistic update:", error);
-         // Revert logic (same as API error case)
-         let taskToRevert: Task | undefined;
-         let currentSwimlaneOfTask: Swimlane | undefined;
-         let taskIndexInCurrentSwimlane = -1;
+        // Revert logic (same as API error case)
+        let taskToRevert: Task | undefined;
+        let currentSwimlaneOfTask: Swimlane | undefined;
+        let taskIndexInCurrentSwimlane = -1;
 
-         if (originalSwimlaneId !== newSwimlaneId) {
-            taskIndexInCurrentSwimlane = targetSwimlane!.tasks.findIndex(t => t.id === taskId);
-            if(taskIndexInCurrentSwimlane !== -1) {
-               taskToRevert = targetSwimlane!.tasks.splice(taskIndexInCurrentSwimlane, 1)[0];
-               currentSwimlaneOfTask = targetSwimlane!;
-            }
-         } else {
-            taskIndexInCurrentSwimlane = originalSwimlane!.tasks.findIndex(t => t.id === taskId);
-            if(taskIndexInCurrentSwimlane !== -1) {
-                taskToRevert = originalSwimlane!.tasks[taskIndexInCurrentSwimlane];
-                currentSwimlaneOfTask = originalSwimlane!;
-            }
-         }
+        if (originalSwimlaneId !== newSwimlaneId) {
+          taskIndexInCurrentSwimlane = targetSwimlane!.tasks.findIndex(t => t.id === taskId);
+          if (taskIndexInCurrentSwimlane !== -1) {
+            taskToRevert = targetSwimlane!.tasks.splice(taskIndexInCurrentSwimlane, 1)[0];
+            currentSwimlaneOfTask = targetSwimlane!;
+          }
+        } else {
+          taskIndexInCurrentSwimlane = originalSwimlane!.tasks.findIndex(t => t.id === taskId);
+          if (taskIndexInCurrentSwimlane !== -1) {
+            taskToRevert = originalSwimlane!.tasks[taskIndexInCurrentSwimlane];
+            currentSwimlaneOfTask = originalSwimlane!;
+          }
+        }
 
-         if (taskToRevert && currentSwimlaneOfTask) {
-           // Ensure all required fields from originalTaskData are passed explicitly
-           const restoredTask = new Task({
-             ...originalTaskData!,
-             id: originalTaskData!.id!,
-             createdAtUtc: originalTaskData!.createdAtUtc!,
-             updatedAtUtc: originalTaskData!.updatedAtUtc!, // Explicitly pass updatedAtUtc
-             ownerIds: originalTaskData!.ownerIds // Restore original ownerIds
-           });
-            if (originalSwimlaneId !== newSwimlaneId) {
-                originalSwimlane!.tasks.splice(taskIndexInOriginalSwimlane, 0, restoredTask);
-            } else {
-                originalSwimlane!.tasks[taskIndexInCurrentSwimlane] = restoredTask;
-            }
-         } else {
-             console.error("Could not find task to revert optimistic update after unexpected error.");
-         }
+        if (taskToRevert && currentSwimlaneOfTask) {
+          // Ensure all required fields from originalTaskData are passed explicitly
+          const restoredTask = new Task({
+            ...originalTaskData!,
+            id: originalTaskData!.id!,
+            createdAtUtc: originalTaskData!.createdAtUtc!,
+            updatedAtUtc: originalTaskData!.updatedAtUtc!, // Explicitly pass updatedAtUtc
+            ownerIds: originalTaskData!.ownerIds // Restore original ownerIds
+          });
+          if (originalSwimlaneId !== newSwimlaneId) {
+            originalSwimlane!.tasks.splice(taskIndexInOriginalSwimlane, 0, restoredTask);
+          } else {
+            originalSwimlane!.tasks[taskIndexInCurrentSwimlane] = restoredTask;
+          }
+        } else {
+          console.error("Could not find task to revert optimistic update after unexpected error.");
+        }
       });
     }
   }

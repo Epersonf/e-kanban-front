@@ -53,7 +53,7 @@ const TaskModal: React.FC<TaskModalProps> = observer(({
       // Type assertion needed if TaskModalProps still allows optional id
       taskEditStore.loadTask(taskToEdit as { id: string; name: string; description?: string; swimlaneId: string; });
     } else if (!isOpen) {
-       // Reset the store when the modal closes
+      // Reset the store when the modal closes
       taskEditStore.reset();
     }
     // Dependency array: run when isOpen changes or the task to edit changes
@@ -107,7 +107,7 @@ const TaskModal: React.FC<TaskModalProps> = observer(({
           <select
             id="swimlane-select"
             value={taskEditStore.swimlaneId} // Bind value to store
-            onChange={e => taskEditStore.updateField('swimlaneId', e.target.value)} // Update store on change
+            onChange={e => taskEditStore.updateField('swimlaneId', e.target.value)}
             required
           >
             <option value="">Selecione uma coluna</option>
@@ -140,9 +140,9 @@ const TaskModal: React.FC<TaskModalProps> = observer(({
 
         {/* Display error from the task edit store */}
         {taskEditStore.error && (
-          <div style={{ color: 'red', marginBottom: '8px' }}>
+          <StatusMessage style={{ color: 'red', marginBottom: '8px' }}>
             {taskEditStore.error}
-          </div>
+          </StatusMessage>
         )}
 
         <ActionButtonsContainer>
