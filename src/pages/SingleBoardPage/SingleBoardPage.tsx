@@ -21,8 +21,7 @@ export const SingleBoardPage: React.FC = observer(() => {
 	const updateSwimlane = useUpdateSwimlanesStore();
 	const createBoard = useCreateBoardsStore();
 	const updateBoard = useUpdateBoardsStore();
-
-	// Não precisa mais de estado local para título, modal, etc. (estão em BoardDetail)
+	
 
 	useEffect(() => {
 		if (boardId) {
@@ -48,7 +47,7 @@ export const SingleBoardPage: React.FC = observer(() => {
 		return () => {
 			singleBoardStore.setSelectedBoardId(null);
 		};
-	}, [boardId]); // Depende apenas do boardId da URL
+	}, [boardId, singleBoardStore, boardsStore]); // Depende apenas do boardId da URL
 
 	// Obter o board selecionado (computed) e loading/error da store apropriada
 	const { selectedBoard } = singleBoardStore;
@@ -58,7 +57,7 @@ export const SingleBoardPage: React.FC = observer(() => {
 	// (Mantenha os handlers que são passados como props para BoardDetail)
 	// Exemplo:
 	const handleSaveBoardTitle = (id: string, name: string, description?: string) => {
-		updateBoard.updateBoard(id, name, description);
+		updateBoard.updateBoard({updateBoard: { id, name, description }});
 	};
 	const handleDeleteBoardSinglePage = (ids: string[]) => { /* ... como definido antes ... */ };
 	const handleAddList = (boardId: string, name: string, order: number) => {
@@ -79,7 +78,7 @@ export const SingleBoardPage: React.FC = observer(() => {
 		console.warn("boardsStore.updateTask não implementado", cardId, listId, updatedData);
 	};
 	const handleCardDelete = (cardId: string, listId: string) => {
-		updateBoard.deleteTask(cardId, listId);
+		updateBoard.deleteTask({ taskId: cardId, swimlaneId: listId });
 	};
 
 	// --- Rendering ---
@@ -101,12 +100,6 @@ export const SingleBoardPage: React.FC = observer(() => {
 						board={selectedBoard}
 						onUpdateBoardTitle={handleSaveBoardTitle}
 						onDeleteBoard={handleDeleteBoardSinglePage}
-						// onAddList={handleAddList}
-						// onUpdateListTitle={handleUpdateList}
-						// onDeleteList={handleDeleteList}
-						// onAddCard={handleAddCard}
-						// onUpdateCard={handleCardUpdate}
-						// onDeleteCard={handleCardDelete}
 					/>
 				) : !boardId ? (
 					<StatusMessage>ID do Board não fornecido.</StatusMessage>

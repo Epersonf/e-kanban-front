@@ -4,6 +4,7 @@ import { Swimlane } from '../../models/general/swimlane.model';
 import { BoardsApi } from '../../infra/api/boards.api';
 import { TasksApi } from '../../infra/api/tasks.api';
 import { parseApiDate } from '../../utils/parse-api-date.utils';
+import { UpdateBoardsModel } from '../../models/boards/update-boards.model';
 
 export class UpdateBoardsStore {
   error: string | null = null;
@@ -12,13 +13,16 @@ export class UpdateBoardsStore {
     makeAutoObservable(this);
   }
 
-  async updateBoard(id: string, name: string, description?: string): Promise<void> {
-    // store.error = null;
+  async updateBoard(params: {
+    updateBoard: UpdateBoardsModel,
+  }): Promise<void> {
+    this.error = null;
+    const { updateBoard: { id, name, description } } = params;
     try {
       const result = await BoardsApi.updateBoard({ id, name, description });
       runInAction(() => {
         if (result.isError()) {
-          // store.error = result.getError() || 'Erro ao atualizar board';
+          this.error = result.getError() || 'Erro ao atualizar board';
           return;
         }
         const updatedBoardData = result.getValue();
@@ -36,79 +40,57 @@ export class UpdateBoardsStore {
     }
   }
 
-  async deleteBoard(ids: string[]): Promise<void> {
-    // store.error = null;
+  async deleteBoard(params: { ids: string[] }): Promise<void> {
+    const { ids } = params;
+    this.error = null;
     try {
       const result = await BoardsApi.deleteBoard(ids);
       runInAction(() => {
         if (result.isError()) {
-          // store.error = result.getError() || 'Erro ao deletar board(s)';
+          this.error = result.getError() || 'Erro ao deletar board(s)';
           return;
         }
-        this.boards = this.boards.filter(b => !ids.includes(b.id!)); // Handle multiple IDs if needed
+        this.boards = this.boards.filter(b => !ids.includes(b.id!));
       });
     } catch (error: any) {
       runInAction(() => {
-        // store.error = 'Erro ao deletar board(s)';
+        this.error = 'Erro ao deletar board(s)';
       });
     }
   }
 
-  async deleteTask(taskId: string, swimlaneId: string): Promise<void> {
-    // store.error = null;
+  async deleteTask(params: { taskId: string, swimlaneId: string }): Promise<void> {
+    this.error = null;
+    const { taskId, swimlaneId } = params;
     try {
       const result = await TasksApi.deleteTask(taskId);
       runInAction(() => {
         if (result.isError()) {
-          // store.error = result.getError() || 'Erro ao deletar cartão';
+          this.error = result.getError() || 'Erro ao deletar cartão';
+          return;
+        }
+        const board = this.boards.find(b => b.swimlanes.some(s => s.id === swimlaneId));
+        if (!board) {
+          console.error(`Board containing swimlane with ID ${swimlaneId} not found.`);
+          this.error = 'Erro interno: Board não encontrado para deletar o cartão.';
           return;
         }
 
-        this.boards = this.boards.map(board => {
-          let boardNeedsUpdate = false;
-          const updatedSwimlanes = board.getSwimlanes().map(swimlane => {
-            if (swimlane.id === swimlaneId) {
-              const initialTaskLength = swimlane.getTasks().length;
-              const updatedTasks = swimlane.getTasks().filter((t) => t.id !== taskId);
-              if (updatedTasks.length < initialTaskLength) {
-                if (swimlane.id && swimlane.createdAtUtc) {
-                  boardNeedsUpdate = true;
-                  return new Swimlane({
-                    id: swimlane.id,
-                    createdAtUtc: swimlane.createdAtUtc,
-                    updatedAtUtc: new Date(), // Swimlane updated time
-                    boardId: swimlane.boardId!,
-                    name: swimlane.name!,
-                    order: swimlane.order!,
-                    tasks: updatedTasks,
-                  });
-                } else {
-                  console.error('Cannot update swimlane after task delete: missing ID/date on swimlane.');
-                  return swimlane;
-                }
-              }
-            }
-            return swimlane;
-          });
-
-          if (boardNeedsUpdate && board.id && board.createdAtUtc) {
-            return new Board({
-              id: board.id,
-              createdAtUtc: board.createdAtUtc,
-              updatedAtUtc: new Date(), // Board updated time
-              name: board.getName(),
-              description: board.getDescription(),
-              members: board.getMembers(),
-              swimlanes: updatedSwimlanes,
-            });
-          }
-          return board;
-        });
-
+        const swimlane = board.swimlanes.find(s => s.id === swimlaneId);
+        if (!swimlane) {
+          console.error(`Swimlane with ID ${swimlaneId} not found in board with ID ${board.id}.`);
+          this.error = 'Erro interno: Swimlane nao encontrado para deletar o cartão.';
+          return;
+        }
+        const initialTaskCount = swimlane.getTasks().length;
+        swimlane.tasks = swimlane.getTasks().filter(t => t.id !== taskId);
+        if (initialTaskCount === swimlane.getTasks().length) {
+          this.error = 'Erro ao deletar cartão';
+        }
       });
     } catch (error: any) {
       runInAction(() => {
-        // store.error = 'Erro ao deletar cartão';
+        this.error = 'Erro ao deletar cartão';
       });
     }
   }

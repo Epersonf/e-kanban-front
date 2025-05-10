@@ -1,9 +1,12 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { HeaderContainer } from './Header.styles';
 
 const Header: React.FC = () => (
   <HeaderContainer>
-    e-Kanban (Trello Style)
+    <Link to="/boards">
+      Kanban (Trello Style)
+    </Link>
   </HeaderContainer>
 );
 

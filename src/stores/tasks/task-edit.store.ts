@@ -1,6 +1,7 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { useBoardsStore } from '../boards/boards.store';
 import { TasksApi } from '../../infra/api/tasks.api'; // Import tasksApi
+import { useSingleBoardStore } from '../boards/single-board.store'; // Import useSingleBoardStore
 
 // Interface matching the task data needed for editing
 interface EditableTaskData {
@@ -19,6 +20,8 @@ export class TaskEditStore {
   ownerIds: string[] = [];
   isLoading: boolean = false;
   error: string | null = null;
+
+  private singleBoardStore = useSingleBoardStore(); // Get instance of SingleBoardStore
 
   constructor() {
     makeAutoObservable(this);
@@ -98,6 +101,14 @@ export class TaskEditStore {
       if (result.isError()) { // Use isError() to check for failure
         throw new Error(result.getError() || 'Unknown error'); // Use getError() and handle null
       }
+
+      // Update the task in the singleBoardStore after successful save
+      const updatedTask = result.getValue();
+      if (updatedTask) {
+        updatedTask.swimlaneId = this.swimlaneId;
+        this.singleBoardStore.updateTaskInSelectedBoard(updatedTask);
+      }
+
 
       runInAction(() => {
         this.isLoading = false;

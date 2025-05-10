@@ -1,5 +1,3 @@
-// src/stores/single-board.store.ts
-// src/stores/single-board.store.ts
 import { makeAutoObservable, computed, runInAction } from 'mobx';
 import { Board } from '../../models/general/board.model';
 import { Task } from '../../models/general/task.model';
@@ -8,136 +6,119 @@ import { TasksApi, UpdateTaskPayload } from '../../infra/api/tasks.api';
 
 export class SingleBoardStore {
 	selectedBoardId: string | null = null;
-	isEditingTitle: boolean = false;
-	editingTitle: string = '';
-	showTaskModal: boolean = false;
+	isEditingTitle = false;
+	editingTitle = '';
+	showTaskModal = false;
 	targetSwimlaneId: string | null = null;
 	taskToEdit: Task | null = null;
 
 	boardStore = useBoardsStore();
 
 	constructor() {
-		makeAutoObservable(this, {
-			selectedBoard: computed
-		});
-	}
-
-	setSelectedBoardId(id: string | null): void {
-		runInAction(() => {
-			this.selectedBoardId = id;
-			// Reset state when board changes
-			this.isEditingTitle = false;
-			this.editingTitle = '';
-			this.showTaskModal = false;
-			this.targetSwimlaneId = null;
-			this.taskToEdit = null;
-		});
-	}
-
-	setEditingTitle(value: string): void {
-		runInAction(() => {
-			this.editingTitle = value;
-		});
-	}
-
-	setIsEditingTitle(value: boolean): void {
-		runInAction(() => {
-			this.isEditingTitle = value;
-			if (!value && this.selectedBoard) {
-				this.editingTitle = this.selectedBoard.getName();
-			}
-		});
-	}
-
-	setShowTaskModal(value: boolean): void {
-		runInAction(() => {
-			this.showTaskModal = value;
-		});
-	}
-
-	setTargetSwimlaneId(value: string | null): void {
-		runInAction(() => {
-			this.targetSwimlaneId = value;
-		});
-	}
-
-	setTaskToEdit(task: Task | null): void {
-		runInAction(() => {
-			this.taskToEdit = task;
-		});
+		makeAutoObservable(this);
 	}
 
 	get selectedBoard(): Board | null {
-		if (!this.selectedBoardId) {
-			return null;
+		if (!this.selectedBoardId) return null;
+		return this.boardStore.boards.find(b => b.id === this.selectedBoardId) || null;
+	}
+
+	setSelectedBoardId(id: string | null): void {
+		this.selectedBoardId = id;
+		this.isEditingTitle = false;
+		this.editingTitle = '';
+		this.showTaskModal = false;
+		this.targetSwimlaneId = null;
+		this.taskToEdit = null;
+	}
+
+	setEditingTitle(value: string): void {
+		this.editingTitle = value;
+	}
+
+	setIsEditingTitle(value: boolean): void {
+		this.isEditingTitle = value;
+		if (!value && this.selectedBoard) {
+			this.editingTitle = this.selectedBoard.getName();
 		}
-		const board = this.boardStore.boards.find(b => b.id === this.selectedBoardId);
-		return board || null;
+	}
+
+	setShowTaskModal(value: boolean): void {
+		this.showTaskModal = value;
+	}
+
+	setTargetSwimlaneId(value: string | null): void {
+		this.targetSwimlaneId = value;
+	}
+
+	setTaskToEdit(task: Task | null): void {
+		this.taskToEdit = task;
 	}
 
 	setBoard(board: Board | null): void {
-		runInAction(() => {
-			this.selectedBoardId = board?.id ?? null;
-			if (board) {
-				this.editingTitle = board.getName();
-			} else {
-				this.editingTitle = '';
-			}
-		});
+		this.selectedBoardId = board?.id ?? null;
+		this.editingTitle = board?.getName() ?? '';
 	}
 
 	handleOpenTaskModal(swimlaneId: string, task?: Task): void {
-		runInAction(() => {
-			this.setTargetSwimlaneId(swimlaneId);
-			if (task) {
-				this.setTaskToEdit(task);
-			} else {
-				this.setTaskToEdit(null);
-			}
-			this.setShowTaskModal(true);
-		});
+		this.setTargetSwimlaneId(swimlaneId);
+		this.setTaskToEdit(task ?? null);
+		this.setShowTaskModal(true);
 	}
 
 	handleCloseTaskModal(): void {
-		runInAction(() => {
-			this.setShowTaskModal(false);
-			this.setTargetSwimlaneId(null);
-			this.setTaskToEdit(null);
+		this.setShowTaskModal(false);
+		this.setTargetSwimlaneId(null);
+		this.setTaskToEdit(null);
+	}
+
+updateTaskInSelectedBoard(updatedTask: Task) {
+  runInAction(() => {
+		if (!this.selectedBoard) return;
+    const swimlane = this.selectedBoard.swimlanes.find(sl => sl.id === updatedTask.swimlaneId);
+    if (swimlane) {
+      const taskIndex = swimlane.tasks.findIndex(t => t.id === updatedTask.id);
+      if (taskIndex !== -1) {
+        swimlane.tasks[taskIndex] = updatedTask;
+      } else {
+        swimlane.tasks.push(updatedTask);
+      }
+    }
+  });
+}
+
+	updateTaskInBoard(updatedTask: Task | null): void {
+		if (!updatedTask || !this.selectedBoard) return;
+
+		const swimlane = this.selectedBoard
+			.getSwimlanes()
+			.find(sl => sl.getTasks().some(t => t.id === updatedTask.id));
+		if (!swimlane) return;
+
+		const index = swimlane.getTasks().findIndex(t => t.id === updatedTask.id);
+		if (index === -1) return;
+
+		swimlane.getTasks()[index] = new Task({
+			id: updatedTask.id!,
+			createdAtUtc: updatedTask.createdAtUtc || new Date(),
+			updatedAtUtc: updatedTask.updatedAtUtc || new Date(),
+			name: updatedTask.getName(),
+			description: updatedTask.getDescription() || '',
+			swimlaneId: updatedTask.getSwimlaneId(),
+			ownerIds: updatedTask.getOwnerIds() || [],
 		});
 	}
 
-	async handleSaveCardDetails(cardId: string, updates: { name?: string; description?: string; ownerIds?: string[] }): Promise<void> {
-		const originalCard = this.selectedBoard
-			?.getSwimlanes()
-			.flatMap((l) => l.getTasks())
-			.find((t) => t.id === cardId);
-		if (!originalCard) return;
-
-		const payload: UpdateTaskPayload = {
-			id: cardId,
-			name: updates.name,
-			description: updates.description,
-			swimlaneId: originalCard.getSwimlaneId(),
-		};
-		const result = await TasksApi.updateTask(payload);
-		if (result.isError()) {
-			console.error('Falha ao atualizar tarefa:', result.getError());
-		} else {
-			runInAction(() => {
-				if (updates.name) originalCard.setName(updates.name);
-				if (updates.description) originalCard.setDescription(updates.description);
-				if (updates.ownerIds) originalCard.setOwnerIds(updates.ownerIds);
-			});
-		}
-		this.handleCloseTaskModal();
-	}
-
-	handleSaveBoardTitle(onUpdateBoardTitle: (boardId: string, newTitle: string, description?: string) => void, board: Board): void {
-		if (!this.editingTitle.trim() || this.editingTitle.trim() === board.getName()) {
+	handleSaveBoardTitle(
+		onUpdateBoardTitle: (boardId: string, newTitle: string, description?: string) => void,
+		board: Board
+	): void {
+		const trimmed = this.editingTitle.trim();
+		if (!trimmed || trimmed === board.getName()) {
 			this.setIsEditingTitle(false);
 			return;
 		}
-		onUpdateBoardTitle(board.id!, this.editingTitle.trim(), board.getDescription());
+		onUpdateBoardTitle(board.id!, trimmed, board.getDescription());
 		this.setIsEditingTitle(false);
 	}
 }
